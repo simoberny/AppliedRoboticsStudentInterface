@@ -10,7 +10,7 @@ namespace student {
  }
 
  void genericImageListener(const cv::Mat& img_in, std::string topic, const std::string& config_folder){
-	std::cout << "Press s to save..." << std::endl;
+	std::cout << "Saving..." << std::endl;
 
 	//cv::imshow(topic, img_in);
 	cv::imwrite(config_folder + "img.jpg", img_in);
