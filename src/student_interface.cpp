@@ -10,7 +10,11 @@ namespace student {
  }
 
  void genericImageListener(const cv::Mat& img_in, std::string topic, const std::string& config_folder){
-    throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );
+	std::cout << "Press s to save..." << std::endl;
+
+	//cv::imshow(topic, img_in);
+	cv::imwrite(config_folder + "img.jpg", img_in);
+	std::cout << "Saved!" << std::endl;
   }
 
   bool extrinsicCalib(const cv::Mat& img_in, std::vector<cv::Point3f> object_points, const cv::Mat& camera_matrix, cv::Mat& rvec, cv::Mat& tvec, const std::string& config_folder){
@@ -20,6 +24,7 @@ namespace student {
   void imageUndistort(const cv::Mat& img_in, cv::Mat& img_out, 
           const cv::Mat& cam_matrix, const cv::Mat& dist_coeffs, const std::string& config_folder){
 
+	std::cout << "Here" << std::endl;
     throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );  
 
   }
