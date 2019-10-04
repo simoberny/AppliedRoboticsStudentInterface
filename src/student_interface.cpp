@@ -5,16 +5,25 @@
 #include <sstream>
 namespace student {
 
+	int image_index = 0;
+
  void loadImage(cv::Mat& img_out, const std::string& config_folder){  
    throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );
  }
 
  void genericImageListener(const cv::Mat& img_in, std::string topic, const std::string& config_folder){
 	std::cout << "Saving..." << std::endl;
-
-	//cv::imshow(topic, img_in);
-	cv::imwrite(config_folder + "img.jpg", img_in);
-	std::cout << "Saved!" << std::endl;
+	char c;
+	
+	std::cin >> c;
+	if(c=='s'){
+		
+		//cv::imshow(topic, img_in);
+		cv::waitKey(20);
+		cv::imwrite(config_folder + "/img_"+std::to_string(student::image_index)+".jpg", img_in);
+		std::cout << "Saved!" << std::endl;
+		student::image_index++;
+	}
   }
 
   bool extrinsicCalib(const cv::Mat& img_in, std::vector<cv::Point3f> object_points, const cv::Mat& camera_matrix, cv::Mat& rvec, cv::Mat& tvec, const std::string& config_folder){
