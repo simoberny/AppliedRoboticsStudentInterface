@@ -5,7 +5,7 @@
 #include <sstream>
 namespace student {
 
-	int image_index = 0;
+ int image_index = 0;
 
  void loadImage(cv::Mat& img_out, const std::string& config_folder){  
    throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );
@@ -14,12 +14,11 @@ namespace student {
  void genericImageListener(const cv::Mat& img_in, std::string topic, const std::string& config_folder){
 	std::cout << "Saving..." << std::endl;
 	char c;
-	
-	std::cin >> c;
+
+	cv::imshow(topic, img_in);
+	c = cv::waitKey(30);
+
 	if(c=='s'){
-		
-		//cv::imshow(topic, img_in);
-		cv::waitKey(20);
 		cv::imwrite(config_folder + "/img_"+std::to_string(student::image_index)+".jpg", img_in);
 		std::cout << "Saved!" << std::endl;
 		student::image_index++;
@@ -27,15 +26,21 @@ namespace student {
   }
 
   bool extrinsicCalib(const cv::Mat& img_in, std::vector<cv::Point3f> object_points, const cv::Mat& camera_matrix, cv::Mat& rvec, cv::Mat& tvec, const std::string& config_folder){
-    throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );   
+	cv::solvePnP(object_points, img_in, camera_matrix, rvec, tvec);
+
+	std::cout << "Rotation: " << rvec << " -- Trasla: " << tvec << std::endl;
+
   }
 
   void imageUndistort(const cv::Mat& img_in, cv::Mat& img_out, 
           const cv::Mat& cam_matrix, const cv::Mat& dist_coeffs, const std::string& config_folder){
 
 	std::cout << "Here" << std::endl;
-    throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );  
 
+	cv::undistort(img_in, img_out, cam_matrix, dist_coeffs);
+
+	cv::imshow("Ciao",  img_out);
+	cv::waitKey(30);
   }
 
   void findPlaneTransform(const cv::Mat& cam_matrix, const cv::Mat& rvec, const cv::Mat& tvec, const std::vector<cv::Point3f>& object_points_plane, cv::Mat& plane_transf, const std::string& config_folder){
