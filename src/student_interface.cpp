@@ -10,7 +10,7 @@
 
 namespace student {
 
-	int image_index = 0;
+ int image_index = 0;
 
  void loadImage(cv::Mat& img_out, const std::string& config_folder){  
    throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );
@@ -25,7 +25,7 @@ namespace student {
 	//std::cin >> c;
 	if(c=='s'){
 		
-		
+	
 		cv::imwrite(config_folder + "/img_"+std::to_string(student::image_index)+".jpg", img_in);
 		std::cout << "Saved!" << std::endl;
 		student::image_index++;
@@ -33,9 +33,11 @@ namespace student {
   }
 
   bool extrinsicCalib(const cv::Mat& img_in, std::vector<cv::Point3f> object_points, const cv::Mat& camera_matrix, cv::Mat& rvec, cv::Mat& tvec, const std::string& config_folder){
-//rvec vettore di rotazioni camera      tvec vettore 3d della posizione della camera (NOTA nel sistema di riferimento della camera!)
 
-    throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );   
+	//cv::solvePnP(object_points, img_in, camera_matrix, rvec, tvec);
+
+	//std::cout << "Rotation: " << rvec << " -- Trasla: " << tvec << std::endl;
+
   }
 
   void imageUndistort(const cv::Mat& img_in, cv::Mat& img_out, 
@@ -48,6 +50,10 @@ namespace student {
 	//cv::waitKey(20);
 
 
+	cv::undistort(img_in, img_out, cam_matrix, dist_coeffs);
+
+	cv::imshow("Ciao",  img_out);
+	cv::waitKey(30);
   }
 
   void findPlaneTransform(const cv::Mat& cam_matrix, const cv::Mat& rvec, 
