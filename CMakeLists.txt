@@ -26,6 +26,8 @@ add_executable(calibrate
 ## Add shared library
 add_library(student SHARED
    src/student_interface.cpp
+   src/find_robot.cpp
+   src/process_arena.cpp
 )
 
 ## Link with libraries 
