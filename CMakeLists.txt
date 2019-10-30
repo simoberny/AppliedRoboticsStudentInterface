@@ -30,6 +30,14 @@ add_library(student SHARED
    src/process_arena.cpp
 )
 
+add_executable(match_template
+   src/match_template.cpp
+)
+# Link with libraries 
+target_link_libraries(match_template
+  ${OpenCV_LIBRARIES}  
+)
+
 ## Link with libraries 
 target_link_libraries(student
   ${OpenCV_LIBRARIES}  
