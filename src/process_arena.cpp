@@ -73,7 +73,7 @@ bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Pol
       std::cout << "AREA " << area << std::endl;
       std::cout << "SIZE: " << contours.size() << std::endl;
       if (area > 500){
-        approxPolyDP(contour, approx_curve, 3, true);
+        approxPolyDP(contour, approx_curve, 8, true);
 
         contours_approx = {approx_curve};
         drawContours(img_in, contours_approx, -1, cv::Scalar(0,0,255), 3, cv::LINE_AA);
@@ -117,7 +117,7 @@ bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Pol
       //std::cout << (i+1) << ") Contour size: " << contours[i].size() << std::endl;
       approxPolyDP(contours[i], approx_curve, 1, true);
 
-      if(approx_curve.size() > 5){
+      if(approx_curve.size() > 6){
         Polygon scaled_contour;
         for (const auto& pt: approx_curve) {
             scaled_contour.emplace_back(pt.x/scale, pt.y/scale);
