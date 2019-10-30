@@ -76,16 +76,18 @@ namespace student {
 
   bool processMap(const cv::Mat& img_in, const double scale, std::vector<Polygon>& obstacle_list, std::vector<std::pair<int,Polygon>>& victim_list, Polygon& gate, const std::string& config_folder){
     
-    cv::Mat hsv_img;
-    cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
+        
+    const bool res1 = processObstacles(img_in, scale, obstacle_list);
+    if(!res1) std::cout << "processObstacles return false" << std::endl;
+    const bool res2 = processGate(img_in, scale, gate);
+    if(!res2) std::cout << "processGate return false" << std::endl;
+    const bool res3 = processVictims(img_in, scale, victim_list);
+    if(!res3) std::cout << "processVictims return false" << std::endl;
 
     
-    const bool res1 = processObstacles(hsv_img, scale, obstacle_list);
-    if(!res1) std::cout << "processObstacles return false" << std::endl;
-    const bool res2 = processGate(hsv_img, scale, gate);
-    if(!res2) std::cout << "processGate return false" << std::endl;
-    const bool res3 = processVictims(hsv_img, scale, victim_list);
-    if(!res3) std::cout << "processVictims return false" << std::endl;
+    
+    cv::imshow("Original", img_in);
+    cv::waitKey(1000);
 
     return res1 && res2 && res3;
   }
