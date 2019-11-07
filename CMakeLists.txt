@@ -28,14 +28,7 @@ add_library(student SHARED
    src/student_interface.cpp
    src/find_robot.cpp
    src/process_arena.cpp
-)
-
-add_executable(match_template
-   src/match_template.cpp
-)
-# Link with libraries 
-target_link_libraries(match_template
-  ${OpenCV_LIBRARIES}  
+   src/find_victim.cpp
 )
 
 ## Link with libraries 

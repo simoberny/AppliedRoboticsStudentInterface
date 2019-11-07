@@ -1,8 +1,7 @@
 #include "include/process_arena.hpp"
-
+#include "include/find_victim.hpp"
 
 //TODO: x ottimizzare la conversion in hsv potrebbe essere fatta 1 solo vaolta!
-
 
 bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Polygon>& obstacle_list){
 
@@ -94,8 +93,7 @@ bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Pol
     return res;
   }
 
-  bool processVictims(const cv::Mat& img_in, const double scale, std::vector<std::pair<int,Polygon>>& victim_list){
-
+  bool processVictims(const cv::Mat& img_in, const double scale, std::vector<std::pair<int,Polygon>>& victim_list, const std::string& config_folder){
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
     
@@ -103,12 +101,9 @@ bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Pol
     cv::Mat green_mask;
     cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
 
-
     std::vector<std::vector<cv::Point>> contours, contours_approx;
     std::vector<cv::Point> approx_curve;
-    //cv::Mat contours_img;
 
-    
     cv::findContours(green_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     //drawContours(contours_img, contours, -1, cv::Scalar(40,190,40), 1, cv::LINE_AA);
     //std::cout << "N. contours: " << contours.size() << std::endl;
@@ -122,16 +117,18 @@ bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Pol
         for (const auto& pt: approx_curve) {
             scaled_contour.emplace_back(pt.x/scale, pt.y/scale);
         }
-        victim_list.push_back({i+1, scaled_contour});
+
+        int victim_n = get_victim_number(boundingRect(cv::Mat(approx_curve)), img_in, config_folder);
+
+        std::cout << "N: " << victim_n << std::endl;
+
+        victim_list.push_back({victim_n, scaled_contour});
         contours_approx = {approx_curve};
+
         drawContours(img_in, contours_approx, -1, cv::Scalar(255,100,180), 3, cv::LINE_AA);
         std::cout << "   Approximated contour size: " << approx_curve.size() << std::endl;
       }
     }
-
-
-    // cv::imshow("Original", contours_img);
-    // cv::waitKey(1);
     
     return true;
   }
