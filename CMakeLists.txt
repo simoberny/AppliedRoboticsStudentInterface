@@ -42,6 +42,7 @@ add_library(student SHARED
    src/process_arena.cpp
    src/find_victim.cpp
    src/dubins.cpp
+   src/loadImage.cpp
 )
 
 ## Link with libraries 

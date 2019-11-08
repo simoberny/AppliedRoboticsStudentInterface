@@ -72,8 +72,13 @@ bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Pol
       std::cout << "AREA " << area << std::endl;
       std::cout << "SIZE: " << contours.size() << std::endl;
       if (area > 500){
-        approxPolyDP(contour, approx_curve, 8, true);
-
+        for(int i=0; i<20; i++){
+          approxPolyDP(contour, approx_curve, i, true);
+          if(contour.size()==3){
+            break;
+          }
+        }
+        
         contours_approx = {approx_curve};
         drawContours(img_in, contours_approx, -1, cv::Scalar(0,0,255), 3, cv::LINE_AA);
 
@@ -94,6 +99,8 @@ bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Pol
   }
 
   bool processVictims(const cv::Mat& img_in, const double scale, std::vector<std::pair<int,Polygon>>& victim_list, const std::string& config_folder){
+
+    //TODO: ATTENZIONE se 2 vittime sono sovrposte le trova come un unico blocco
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
     
