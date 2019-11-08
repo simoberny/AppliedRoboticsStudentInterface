@@ -34,8 +34,6 @@ namespace student {
 	
 	//std::cin >> c;
 	if(c=='s'){
-		
-	
 		cv::imwrite(config_folder + "/img_"+std::to_string(student::image_index)+".jpg", img_in);
 		std::cout << "Saved!" << std::endl;
 		student::image_index++;
@@ -191,7 +189,7 @@ namespace student {
     if(!res1) std::cout << "processObstacles return false" << std::endl;
     const bool res2 = processGate(img_in, scale, gate);
     if(!res2) std::cout << "processGate return false" << std::endl;
-    const bool res3 = processVictims(img_in, scale, victim_list);
+    const bool res3 = processVictims(img_in, scale, victim_list, config_folder);
     if(!res3) std::cout << "processVictims return false" << std::endl;
 
     
