@@ -29,6 +29,7 @@ add_library(student SHARED
    src/find_robot.cpp
    src/process_arena.cpp
    src/find_victim.cpp
+   src/loadImage.cpp
 )
 
 ## Link with libraries 

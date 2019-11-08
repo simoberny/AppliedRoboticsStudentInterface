@@ -22,9 +22,12 @@ namespace student {
 
  int image_index = 0;
 
+//  vedi libreria
+/*
  void loadImage(cv::Mat& img_out, const std::string& config_folder){  
-   throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );
- }
+   //throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" )   
+ */
+ 
 
  void genericImageListener(const cv::Mat& img_in, std::string topic, const std::string& config_folder){
 	std::cout << "Saving..." << std::endl;
@@ -184,7 +187,7 @@ namespace student {
 
   bool processMap(const cv::Mat& img_in, const double scale, std::vector<Polygon>& obstacle_list, std::vector<std::pair<int,Polygon>>& victim_list, Polygon& gate, const std::string& config_folder){
     
-        
+    std::cout << "enter in process map"<<std::endl;   
     const bool res1 = processObstacles(img_in, scale, obstacle_list);
     if(!res1) std::cout << "processObstacles return false" << std::endl;
     const bool res2 = processGate(img_in, scale, gate);
