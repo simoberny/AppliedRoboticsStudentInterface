@@ -30,53 +30,58 @@ namespace student {
             break;
         }
         }
-        double area = cv::contourArea(approx_curve);
+        if (approx_curve.size() == 3){
+            double area = cv::contourArea(approx_curve);
 
-        std::cout <<"-----Aprox Contour size: " << approx_curve.size() << std::endl;
-        std::cout << "Area: " << area << std::endl;
-        std::cout << "punti trovati: 1 " << std::endl;
-        std::cout <<" x "<< approx_curve[0].x <<" y "<<approx_curve[0].y << std::endl;
-        std::cout <<" x "<< approx_curve[1].x <<" y "<<approx_curve[1].y << std::endl;
-        std::cout <<" x "<< approx_curve[2].x <<" y "<<approx_curve[2].y << std::endl;
+            std::cout <<"-----Aprox Contour size: " << approx_curve.size() << std::endl;
+            std::cout << "Area: " << area << std::endl;
+            std::cout << "punti trovati: 1 " << std::endl;
+            std::cout <<" x "<< approx_curve[0].x <<" y "<<approx_curve[0].y << std::endl;
+            std::cout <<" x "<< approx_curve[1].x <<" y "<<approx_curve[1].y << std::endl;
+            std::cout <<" x "<< approx_curve[2].x <<" y "<<approx_curve[2].y << std::endl;
 
-        for (const auto& pt: approx_curve) {
-        triangle.emplace_back(pt.x/scale, pt.y/scale);
-        }
-
-        double cx, cy;
-        for (auto item: triangle) 
-        {
-            cx += item.x;
-            cy += item.y;
-        }
-        cx /= triangle.size();
-        cy /= triangle.size();
-
-        double dst = 0;
-        Point vertex;
-        for (auto& item: triangle)
-        {
-            double dx = item.x-cx;      
-            double dy = item.y-cy;
-            double curr_d = dx*dx + dy*dy;
-            if (curr_d > dst)
-            { 
-            dst = curr_d;
-            vertex = item;
+            for (const auto& pt: approx_curve) {
+            triangle.emplace_back(pt.x/scale, pt.y/scale);
             }
+
+            double cx, cy;
+            for (auto item: triangle) 
+            {
+                cx += item.x;
+                cy += item.y;
+            }
+            cx /= triangle.size();
+            cy /= triangle.size();
+
+            double dst = 0;
+            Point vertex;
+            for (auto& item: triangle)
+            {
+                double dx = item.x-cx;      
+                double dy = item.y-cy;
+                double curr_d = dx*dx + dy*dy;
+                if (curr_d > dst)
+                { 
+                dst = curr_d;
+                vertex = item;
+                }
+            }
+
+            //drawContours vuole in input un vettore di vettori di posizioni (approx_curve è solo un vettore)
+            std::vector<std::vector<cv::Point>> vec_approx_curve;    
+            vec_approx_curve = {approx_curve};
+            cv::drawContours(img_in, vec_approx_curve, -1, cv::Scalar(0,0,255), 3, cv::LINE_AA);
+            //calcolo la posizione del robot (rotazione e posizione del vertice del triangolo)
+            
+            std::cout <<"-----triangle position (in meter?):  " << std::endl;
+            std::cout <<" x "<< triangle[0].x <<" y "<<triangle[0].y << std::endl;
+            std::cout <<" x "<< triangle[1].x <<" y "<<triangle[1].y << std::endl;
+            std::cout <<" x "<< triangle[2].x <<" y "<<triangle[2].y << std::endl;
+            return true;
+
+        }else{
+            return false;
         }
-
-        //drawContours vuole in input un vettore di vettori di posizioni (approx_curve è solo un vettore)
-        std::vector<std::vector<cv::Point>> vec_approx_curve;    
-        vec_approx_curve = {approx_curve};
-        cv::drawContours(img_in, vec_approx_curve, -1, cv::Scalar(0,0,255), 3, cv::LINE_AA);
-        //calcolo la posizione del robot (rotazione e posizione del vertice del triangolo)
-        
-        std::cout <<"-----triangle position (in meter?):  " << std::endl;
-        std::cout <<" x "<< triangle[0].x <<" y "<<triangle[0].y << std::endl;
-        std::cout <<" x "<< triangle[1].x <<" y "<<triangle[1].y << std::endl;
-        std::cout <<" x "<< triangle[2].x <<" y "<<triangle[2].y << std::endl;
-
     }
 
 }
