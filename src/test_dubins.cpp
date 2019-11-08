@@ -11,7 +11,7 @@ int main(){
     double xf = 4, yf = 0, thf = -M_PI/2;
     double Kmax = 1.0;
 
-    Dubins dub();
+    Dubins dub;
     dub.setParams(x0, y0, th0, xf, yf, thf, Kmax);
     pair<int, curve> ret = dub.shortest_path();
 

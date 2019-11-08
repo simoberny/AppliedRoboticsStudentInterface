@@ -1,8 +1,8 @@
 #include "include/dubins.hpp"
 
-
 Dubins::Dubins() {}
-void Dubins::setParams() (double x0, double y0, double th0, double xf, double yf, double thf, double kmax) { 
+
+void Dubins::setParams (double x0, double y0, double th0, double xf, double yf, double thf, double kmax) { 
     this->x0 = x0;
     this->y0 = y0;
     this->th0 = th0;
@@ -245,7 +245,7 @@ tuple<double, double, double, double> scaleToStandard(double x0, double y0, doub
     return make_tuple(sc_th0, sc_thf, sc_Kmax, lambda);
 }
 
-pair<int, curve> Dubins::shortest_path (){
+pair<int, curve> Dubins::shortest_path () {
     double sc_s1, sc_s2, sc_s3;
     
     // Calcolo valori scalati
@@ -297,12 +297,27 @@ pair<int, curve> Dubins::shortest_path (){
         double s1, s2, s3;
         tie(s1, s2, s3) = scaleFromStandard(lambda, sc_s1, sc_s2, sc_s3);
         
-        cur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[pidx][1]*Kmax, ksigns[pidx][2]*Kmax, ksigns[pidx][3]*Kmax);
+        cur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[pidx][1]*kmax, ksigns[pidx][2]*kmax, ksigns[pidx][3]*kmax);
         
         // Assertion  
     }
 
     return make_pair(pidx, cur);
+}
+
+Path Dubins::getPath(arc a){
+    Path p;
+    int npts = 50;
+    double x, y, th;
+
+    for(int i = 0; i < npts; i++){
+        int s = a.L/npts * i;
+
+        tie(x, y, th) = circline(s, a.x0, a.y0, a.th0, a.k);
+        p.points.emplace_back(s,x,y,th,a.k);
+    }
+
+    return p;
 }
 
 void print_arc(arc a, string nome){

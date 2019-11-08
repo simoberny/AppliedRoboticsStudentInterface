@@ -11,7 +11,7 @@
 #include <experimental/filesystem>
 #include <sstream>
 
-
+#include "include/dubins.hpp"
 #include "include/process_arena.hpp"
 
 // x pc arena: us,ps robotics robtics
@@ -207,7 +207,17 @@ namespace student {
   */
 
   bool planPath(const Polygon& borders, const std::vector<Polygon>& obstacle_list, const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, Path& path){
-    throw std::logic_error( "STUDENT FUNCTION NOT IMPLEMENTED" );     
+    double xf = gate[0].x;
+    double yf = gate[0].y;
+    
+    Dubins dub;
+    dub.setParams(x, y, theta, xf, yf, M_PI/2, 1.0);
+    pair<int, curve> ret = dub.shortest_path();
+    curve cur = ret.second;
+
+    Path p = dub.getPath(cur.a1);
+
+    path = p;
   }
 }
 
