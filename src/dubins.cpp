@@ -1,27 +1,16 @@
-#include <math.h>
-#include <iostream>
-#include <tuple>
-#include <vector>
+#include "include/dubins.hpp"
 
-using namespace std;
 
-struct arc {
-    double x0;
-    double y0;
-    double th0;
-    double xf;
-    double yf;
-    double thf;
-    double k;
-    double L;
-};
-
-struct curve {
-  arc a1;
-  arc a2;
-  arc a3;
-  double L;
-};
+Dubins::Dubins() {}
+void Dubins::setParams() (double x0, double y0, double th0, double xf, double yf, double thf, double kmax) { 
+    this->x0 = x0;
+    this->y0 = y0;
+    this->th0 = th0;
+    this->xf = xf; 
+    this->yf = yf;
+    this->thf = thf;
+    this->kmax = kmax;
+}
 
 double sinc(double t){
     double s;
@@ -256,12 +245,12 @@ tuple<double, double, double, double> scaleToStandard(double x0, double y0, doub
     return make_tuple(sc_th0, sc_thf, sc_Kmax, lambda);
 }
 
-pair<int, curve> dubins_shortest_path (double x0, double y0, double th0, double xf, double yf, double thf, double Kmax){
+pair<int, curve> Dubins::shortest_path (){
     double sc_s1, sc_s2, sc_s3;
     
     // Calcolo valori scalati
     double sc_th0, sc_thf, sc_Kmax, lambda;
-    tie(sc_th0, sc_thf, sc_Kmax, lambda) = scaleToStandard(x0, y0, th0, xf, yf, thf, Kmax);
+    tie(sc_th0, sc_thf, sc_Kmax, lambda) = scaleToStandard(this->x0, this->y0, this->th0, this->xf, this->yf, this->thf, this->kmax);
 
     vector<tuple<bool, double, double, double> (*)(double, double, double)> primitives = 
         {&LSL, &RSR, &LSR, &RSL, &RLR, &LRL};
@@ -321,25 +310,4 @@ void print_arc(arc a, string nome){
     cout << "(x0: " << a.x0 << ", y0: " << a.y0 << ", th0: "<< a.th0 << ")" << endl;
     cout << "(xf: " << a.xf << ", yf: " << a.yf << ", thf: "<< a.thf << ")" << endl;
     cout << "K: " << a.k << "- L: " << a.L << ")" << endl;
-}
-
-int main(){
-    double x0 = 0, y0 = 0, th0 = -M_PI/2;
-    double xf = 4, yf = 0, thf = -M_PI/2;
-    double Kmax = 1.0;
-
-    pair<int, curve> ret = dubins_shortest_path(x0, y0, th0, xf, yf, thf, Kmax);
-    curve cur = ret.second;
-
-    if(ret.first > 0){
-        /*print_arc(cur.a1, "A1");
-        print_arc(cur.a2, "A2");
-        print_arc(cur.a3, "A3");*/
-
-        cout << "Lunghezza totale: " << cur.L << endl;
-    }else{
-        cout << "Failed" << endl;
-    }
-
-    return 0;
 }
