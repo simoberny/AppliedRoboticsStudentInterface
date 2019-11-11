@@ -209,18 +209,27 @@ namespace student {
   }
   */
 
-  bool planPath(const Polygon& borders, const std::vector<Polygon>& obstacle_list, const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, Path& path){
-    double xf = gate[0].x;
-    double yf = gate[0].y;
-    
-    Dubins dub;
-    dub.setParams(x, y, theta, xf, yf, M_PI/2, 1.0);
-    pair<int, curve> ret = dub.shortest_path();
-    curve cur = ret.second;
+  bool planPath(const Polygon& borders, const std::vector<Polygon>& obstacle_list, const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, Path& path, const string& config_folder){
+      double xf = 1.28;
+      double yf = 1.03;
 
-    Path p = dub.getPath(cur.a1);
+      for(int i = 0; i < borders.size(); i++){
+        cout << "Border: " << borders[i].x << " - " << borders[i].y << endl;
+      }
 
-    path = p;
+
+      for(int i = 0; i < gate.size(); i++){
+        cout << "Gate: " << gate[i].x << " - " << gate[i].y << endl;
+      }
+      
+      Dubins dub;
+      dub.setParams(x, y, 0, xf, yf, M_PI/2, 1.0);
+      pair<int, curve> ret = dub.shortest_path();
+      curve cur = ret.second;
+
+      cout << "lunghezza totale: "  << cur.L << endl;
+
+      path = dub.getPath(cur);
   }
 }
 

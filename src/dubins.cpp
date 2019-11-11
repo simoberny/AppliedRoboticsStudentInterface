@@ -279,7 +279,9 @@ pair<int, curve> Dubins::shortest_path () {
         double s1, s2, s3;
         tie(s1, s2, s3) = scaleFromStandard(lambda, sc_s1_c, sc_s2_c, sc_s3_c);
 
-        cout << "L: " << Lcur*2 << " \n s1: " << s1 << " \n s2: " << s2 << " \n s3: " << s3 << endl;
+        curve tempcur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[pidx][1]*kmax, ksigns[pidx][2]*kmax, ksigns[pidx][3]*kmax);       
+        cout << "L: " << tempcur.L << " \n s1: " << s1 << " \n s2: " << s2 << " \n s3: " << s3 << endl;
+
 
         if(ok && Lcur < L){
             L = Lcur;
@@ -293,28 +295,44 @@ pair<int, curve> Dubins::shortest_path () {
 
     curve cur; 
 
-    if(pidx > 0){
+    if(pidx >= 0){
         double s1, s2, s3;
         tie(s1, s2, s3) = scaleFromStandard(lambda, sc_s1, sc_s2, sc_s3);
-        
+
         cur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[pidx][1]*kmax, ksigns[pidx][2]*kmax, ksigns[pidx][3]*kmax);
         
         // Assertion  
+    }else{
+        cout << "PIDX < 0" << endl;
     }
 
     return make_pair(pidx, cur);
 }
 
-Path Dubins::getPath(arc a){
+Path Dubins::getPath(curve c){
     Path p;
-    int npts = 50;
+    int npts = 30;
     double x, y, th;
 
     for(int i = 0; i < npts; i++){
-        int s = a.L/npts * i;
+        double s = c.a1.L/npts * i;
 
-        tie(x, y, th) = circline(s, a.x0, a.y0, a.th0, a.k);
-        p.points.emplace_back(s,x,y,th,a.k);
+        tie(x, y, th) = circline(s, c.a1.x0, c.a1.y0, c.a1.th0, c.a1.k);
+        p.points.emplace_back(s,x,y,th,c.a1.k);
+    }
+
+    for(int i = 0; i < npts; i++){
+        double s =  c.a2.L/npts * i;
+
+        tie(x, y, th) = circline(s, c.a2.x0, c.a2.y0, c.a2.th0, c.a2.k);
+        p.points.emplace_back(s,x,y,th,c.a2.k);
+    }
+
+    for(int i = 0; i < npts; i++){
+        double s =  c.a3.L/npts * i;
+
+        tie(x, y, th) = circline(s, c.a3.x0, c.a3.y0, c.a3.th0, c.a3.k);
+        p.points.emplace_back(s,x,y,th,c.a3.k);
     }
 
     return p;

@@ -7,8 +7,8 @@
 using namespace std;
 
 int main(){
-    double x0 = 0, y0 = 0, th0 = -M_PI/2;
-    double xf = 4, yf = 0, thf = -M_PI/2;
+    double x0 = 0, y0 = 0, th0 = 0;
+    double xf = 1.28, yf = 1.03, thf = M_PI/2;
     double Kmax = 1.0;
 
     Dubins dub;
@@ -17,7 +17,7 @@ int main(){
 
     curve cur = ret.second;
 
-    if(ret.first > 0){
+    if(ret.first >= 0){
         cout << "Lunghezza totale: " << cur.L << endl;
     }else{
         cout << "Failed" << endl;
