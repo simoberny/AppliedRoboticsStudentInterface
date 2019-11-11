@@ -111,19 +111,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named student
-
-# Build rule for target.
-student: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 student
-.PHONY : student
-
-# fast build rule for target.
-student/fast:
-	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/build
-.PHONY : student/fast
-
-#=============================================================================
 # Target rules for targets named calibrate
 
 # Build rule for target.
@@ -135,6 +122,45 @@ calibrate: cmake_check_build_system
 calibrate/fast:
 	$(MAKE) -f CMakeFiles/calibrate.dir/build.make CMakeFiles/calibrate.dir/build
 .PHONY : calibrate/fast
+
+#=============================================================================
+# Target rules for targets named test1
+
+# Build rule for target.
+test1: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test1
+.PHONY : test1
+
+# fast build rule for target.
+test1/fast:
+	$(MAKE) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/build
+.PHONY : test1/fast
+
+#=============================================================================
+# Target rules for targets named dubins
+
+# Build rule for target.
+dubins: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 dubins
+.PHONY : dubins
+
+# fast build rule for target.
+dubins/fast:
+	$(MAKE) -f CMakeFiles/dubins.dir/build.make CMakeFiles/dubins.dir/build
+.PHONY : dubins/fast
+
+#=============================================================================
+# Target rules for targets named student
+
+# Build rule for target.
+student: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 student
+.PHONY : student
+
+# fast build rule for target.
+student/fast:
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/build
+.PHONY : student/fast
 
 src/camera_calibration.o: src/camera_calibration.cpp.o
 
@@ -163,6 +189,36 @@ src/camera_calibration.cpp.s:
 	$(MAKE) -f CMakeFiles/calibrate.dir/build.make CMakeFiles/calibrate.dir/src/camera_calibration.cpp.s
 .PHONY : src/camera_calibration.cpp.s
 
+src/dubins.o: src/dubins.cpp.o
+
+.PHONY : src/dubins.o
+
+# target to build an object file
+src/dubins.cpp.o:
+	$(MAKE) -f CMakeFiles/dubins.dir/build.make CMakeFiles/dubins.dir/src/dubins.cpp.o
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/dubins.cpp.o
+.PHONY : src/dubins.cpp.o
+
+src/dubins.i: src/dubins.cpp.i
+
+.PHONY : src/dubins.i
+
+# target to preprocess a source file
+src/dubins.cpp.i:
+	$(MAKE) -f CMakeFiles/dubins.dir/build.make CMakeFiles/dubins.dir/src/dubins.cpp.i
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/dubins.cpp.i
+.PHONY : src/dubins.cpp.i
+
+src/dubins.s: src/dubins.cpp.s
+
+.PHONY : src/dubins.s
+
+# target to generate assembly for a file
+src/dubins.cpp.s:
+	$(MAKE) -f CMakeFiles/dubins.dir/build.make CMakeFiles/dubins.dir/src/dubins.cpp.s
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/dubins.cpp.s
+.PHONY : src/dubins.cpp.s
+
 src/find_robot.o: src/find_robot.cpp.o
 
 .PHONY : src/find_robot.o
@@ -189,6 +245,60 @@ src/find_robot.s: src/find_robot.cpp.s
 src/find_robot.cpp.s:
 	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/find_robot.cpp.s
 .PHONY : src/find_robot.cpp.s
+
+src/find_victim.o: src/find_victim.cpp.o
+
+.PHONY : src/find_victim.o
+
+# target to build an object file
+src/find_victim.cpp.o:
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/find_victim.cpp.o
+.PHONY : src/find_victim.cpp.o
+
+src/find_victim.i: src/find_victim.cpp.i
+
+.PHONY : src/find_victim.i
+
+# target to preprocess a source file
+src/find_victim.cpp.i:
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/find_victim.cpp.i
+.PHONY : src/find_victim.cpp.i
+
+src/find_victim.s: src/find_victim.cpp.s
+
+.PHONY : src/find_victim.s
+
+# target to generate assembly for a file
+src/find_victim.cpp.s:
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/find_victim.cpp.s
+.PHONY : src/find_victim.cpp.s
+
+src/loadImage.o: src/loadImage.cpp.o
+
+.PHONY : src/loadImage.o
+
+# target to build an object file
+src/loadImage.cpp.o:
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/loadImage.cpp.o
+.PHONY : src/loadImage.cpp.o
+
+src/loadImage.i: src/loadImage.cpp.i
+
+.PHONY : src/loadImage.i
+
+# target to preprocess a source file
+src/loadImage.cpp.i:
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/loadImage.cpp.i
+.PHONY : src/loadImage.cpp.i
+
+src/loadImage.s: src/loadImage.cpp.s
+
+.PHONY : src/loadImage.s
+
+# target to generate assembly for a file
+src/loadImage.cpp.s:
+	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/loadImage.cpp.s
+.PHONY : src/loadImage.cpp.s
 
 src/process_arena.o: src/process_arena.cpp.o
 
@@ -244,6 +354,33 @@ src/student_interface.cpp.s:
 	$(MAKE) -f CMakeFiles/student.dir/build.make CMakeFiles/student.dir/src/student_interface.cpp.s
 .PHONY : src/student_interface.cpp.s
 
+src/test_dubins.o: src/test_dubins.cpp.o
+
+.PHONY : src/test_dubins.o
+
+# target to build an object file
+src/test_dubins.cpp.o:
+	$(MAKE) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/src/test_dubins.cpp.o
+.PHONY : src/test_dubins.cpp.o
+
+src/test_dubins.i: src/test_dubins.cpp.i
+
+.PHONY : src/test_dubins.i
+
+# target to preprocess a source file
+src/test_dubins.cpp.i:
+	$(MAKE) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/src/test_dubins.cpp.i
+.PHONY : src/test_dubins.cpp.i
+
+src/test_dubins.s: src/test_dubins.cpp.s
+
+.PHONY : src/test_dubins.s
+
+# target to generate assembly for a file
+src/test_dubins.cpp.s:
+	$(MAKE) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/src/test_dubins.cpp.s
+.PHONY : src/test_dubins.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -252,20 +389,34 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... student"
 	@echo "... calibrate"
+	@echo "... test1"
+	@echo "... dubins"
+	@echo "... student"
 	@echo "... src/camera_calibration.o"
 	@echo "... src/camera_calibration.i"
 	@echo "... src/camera_calibration.s"
+	@echo "... src/dubins.o"
+	@echo "... src/dubins.i"
+	@echo "... src/dubins.s"
 	@echo "... src/find_robot.o"
 	@echo "... src/find_robot.i"
 	@echo "... src/find_robot.s"
+	@echo "... src/find_victim.o"
+	@echo "... src/find_victim.i"
+	@echo "... src/find_victim.s"
+	@echo "... src/loadImage.o"
+	@echo "... src/loadImage.i"
+	@echo "... src/loadImage.s"
 	@echo "... src/process_arena.o"
 	@echo "... src/process_arena.i"
 	@echo "... src/process_arena.s"
 	@echo "... src/student_interface.o"
 	@echo "... src/student_interface.i"
 	@echo "... src/student_interface.s"
+	@echo "... src/test_dubins.o"
+	@echo "... src/test_dubins.i"
+	@echo "... src/test_dubins.s"
 .PHONY : help
 
 

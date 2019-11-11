@@ -227,6 +227,7 @@ namespace student {
       pair<int, curve> ret = dub.shortest_path();
       curve cur = ret.second;
 
+      cout << "Curva selezionata: " << ret.first << endl;
       cout << "lunghezza totale: "  << cur.L << endl;
 
       path = dub.getPath(cur);

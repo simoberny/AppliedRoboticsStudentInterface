@@ -40,7 +40,7 @@ double mod2pi(double ang){
 
 tuple<double, double, double> circline(double s, double x0, double y0, double th0, double k){
     double x = x0 + s * sinc(k * s / 2.0) * cos(th0 + k * s /2);
-    double y = y0 + s * sinc(k * s / 2.0) * cos(th0 + k * s /2);
+    double y = y0 + s * sinc(k * s / 2.0) * sin(th0 + k * s /2);
     double th = mod2pi(th0 + k * s);
 
     return make_tuple(x, y, th);
@@ -279,7 +279,7 @@ pair<int, curve> Dubins::shortest_path () {
         double s1, s2, s3;
         tie(s1, s2, s3) = scaleFromStandard(lambda, sc_s1_c, sc_s2_c, sc_s3_c);
 
-        curve tempcur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[pidx][1]*kmax, ksigns[pidx][2]*kmax, ksigns[pidx][3]*kmax);       
+        curve tempcur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[i][0]*kmax, ksigns[i][1]*kmax, ksigns[i][2]*kmax);       
         cout << "L: " << tempcur.L << " \n s1: " << s1 << " \n s2: " << s2 << " \n s3: " << s3 << endl;
 
 
@@ -299,7 +299,7 @@ pair<int, curve> Dubins::shortest_path () {
         double s1, s2, s3;
         tie(s1, s2, s3) = scaleFromStandard(lambda, sc_s1, sc_s2, sc_s3);
 
-        cur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[pidx][1]*kmax, ksigns[pidx][2]*kmax, ksigns[pidx][3]*kmax);
+        cur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[pidx][0]*kmax, ksigns[pidx][1]*kmax, ksigns[pidx][2]*kmax);
         
         // Assertion  
     }else{
@@ -311,25 +311,29 @@ pair<int, curve> Dubins::shortest_path () {
 
 Path Dubins::getPath(curve c){
     Path p;
-    int npts = 30;
+    int npts = 100;
     double x, y, th;
 
-    for(int i = 0; i < npts; i++){
-        double s = c.a1.L/npts * i;
+    cout << "Lunghezze singole: " << c.a1.L << " - " << c.a2.L << " - " << c.a3.L << endl;
+
+    double s_g = c.L/npts;
+
+    for(int i = 0; i < floor(c.a1.L/s_g); i++){
+        double s = s_g * i;
 
         tie(x, y, th) = circline(s, c.a1.x0, c.a1.y0, c.a1.th0, c.a1.k);
         p.points.emplace_back(s,x,y,th,c.a1.k);
     }
 
-    for(int i = 0; i < npts; i++){
-        double s =  c.a2.L/npts * i;
+    for(int i = 0; i < floor(c.a2.L/s_g); i++){
+        double s =  s_g * i;
 
         tie(x, y, th) = circline(s, c.a2.x0, c.a2.y0, c.a2.th0, c.a2.k);
         p.points.emplace_back(s,x,y,th,c.a2.k);
     }
 
-    for(int i = 0; i < npts; i++){
-        double s =  c.a3.L/npts * i;
+    for(int i = 0; i < floor(c.a3.L/s_g); i++){
+        double s =  s_g * i;
 
         tie(x, y, th) = circline(s, c.a3.x0, c.a3.y0, c.a3.th0, c.a3.k);
         p.points.emplace_back(s,x,y,th,c.a3.k);
