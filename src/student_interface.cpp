@@ -223,7 +223,7 @@ namespace student {
       }
       
       Dubins dub;
-      dub.setParams(x, y, 0, xf, yf, M_PI/2, 1.0);
+      dub.setParams(x, y, 0, xf, yf, M_PI/2, 10.0);
       pair<int, curve> ret = dub.shortest_path();
       curve cur = ret.second;
 

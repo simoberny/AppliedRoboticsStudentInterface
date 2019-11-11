@@ -66,6 +66,12 @@ namespace student {
                 vertex = item;
                 }
             }
+            double dx = cx-vertex.x;
+            double dy = cy-vertex.y;
+
+            x = cx;
+            y = cy;
+            theta = std::atan2(dy, dx);
 
             //drawContours vuole in input un vettore di vettori di posizioni (approx_curve è solo un vettore)
             std::vector<std::vector<cv::Point>> vec_approx_curve;    
@@ -77,7 +83,11 @@ namespace student {
             std::cout <<" x "<< triangle[0].x <<" y "<<triangle[0].y << std::endl;
             std::cout <<" x "<< triangle[1].x <<" y "<<triangle[1].y << std::endl;
             std::cout <<" x "<< triangle[2].x <<" y "<<triangle[2].y << std::endl;
+
+
+
             return true;
+
 
         }else{
             return false;

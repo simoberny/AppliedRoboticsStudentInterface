@@ -1,6 +1,0 @@
-/home/lar2019/project/AppliedRoboticsStudentInterface/CMakeFiles/edit_cache.dir
-/home/lar2019/project/AppliedRoboticsStudentInterface/CMakeFiles/rebuild_cache.dir
-/home/lar2019/project/AppliedRoboticsStudentInterface/CMakeFiles/calibrate.dir
-/home/lar2019/project/AppliedRoboticsStudentInterface/CMakeFiles/test1.dir
-/home/lar2019/project/AppliedRoboticsStudentInterface/CMakeFiles/dubins.dir
-/home/lar2019/project/AppliedRoboticsStudentInterface/CMakeFiles/student.dir
