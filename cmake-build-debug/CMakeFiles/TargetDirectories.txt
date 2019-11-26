@@ -1,7 +1,0 @@
-/home/osboxes/workspace/project/cmake-build-debug/CMakeFiles/test.dir
-/home/osboxes/workspace/project/cmake-build-debug/CMakeFiles/calibrate.dir
-/home/osboxes/workspace/project/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/osboxes/workspace/project/cmake-build-debug/CMakeFiles/test1.dir
-/home/osboxes/workspace/project/cmake-build-debug/CMakeFiles/student.dir
-/home/osboxes/workspace/project/cmake-build-debug/CMakeFiles/dubins.dir
-/home/osboxes/workspace/project/cmake-build-debug/CMakeFiles/edit_cache.dir

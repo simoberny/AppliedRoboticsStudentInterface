@@ -10,32 +10,32 @@ const int scala1 = 500;
 namespace boost {
     namespace polygon {
 
-        template <>
+        template<>
         struct geometry_concept<Voronoi::Point> {
             typedef point_concept type;
         };
 
-        template <>
+        template<>
         struct point_traits<Voronoi::Point> {
             typedef int coordinate_type;
 
             static inline coordinate_type get(
-                    const Voronoi::Point& point, orientation_2d orient) {
+                    const Voronoi::Point &point, orientation_2d orient) {
                 return (orient == HORIZONTAL) ? point.a : point.b;
             }
         };
 
-        template <>
+        template<>
         struct geometry_concept<Voronoi::Segment> {
             typedef segment_concept type;
         };
 
-        template <>
+        template<>
         struct segment_traits<Voronoi::Segment> {
             typedef int coordinate_type;
             typedef Voronoi::Point point_type;
 
-            static inline point_type get(const Voronoi::Segment& segment, direction_1d dir) {
+            static inline point_type get(const Voronoi::Segment &segment, direction_1d dir) {
                 return dir.to_int() ? segment.p1 : segment.p0;
             }
         };
@@ -43,7 +43,7 @@ namespace boost {
 }  // boost
 
 
-Voronoi::Voronoi(){     // Constructor
+Voronoi::Voronoi() {     // Constructor
 
 }
 
@@ -53,7 +53,7 @@ Voronoi::Voronoi(){     // Constructor
 float test_vector[4][4];
 const int matrix_size = 4;
 
-std::pair<double, double> calcCentroid(const Polygon& p) {
+std::pair<double, double> calcCentroid(const Polygon &p) {
     double max_x = 0, max_y = 0, min_x = 1000, min_y = 1000;
 
     for (auto a : p) {
@@ -69,29 +69,41 @@ std::pair<double, double> calcCentroid(const Polygon& p) {
     return std::make_pair(cx, cy);
 }
 
-void Voronoi::calculate(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd){
+void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
+                        const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
+                        const float y, const float theta, voronoi_diagram<double> &vd) {
     std::vector<Point> points;
     std::vector<Segment> segments;
 
-    std::pair<double,double> gate_center = calcCentroid(gate);
+    std::pair<double, double> gate_center = calcCentroid(gate);
 
 
     // croce sulle vittime per forzare il diagramma di voronoi a passare sopra
     for (int i = 0; i < victim_list.size(); i++) {
-        std::pair<double,double> victim_center = calcCentroid(victim_list[i].second);
-        segments.push_back(Segment(victim_center.first*scala1, victim_center.second*scala1, victim_center.first*scala1+10, victim_center.second*scala1-10));
-        segments.push_back(Segment(victim_center.first*scala1, victim_center.second*scala1, victim_center.first*scala1+10, victim_center.second*scala1+10));
-        segments.push_back(Segment(victim_center.first*scala1, victim_center.second*scala1, victim_center.first*scala1-10, victim_center.second*scala1-10));
-        segments.push_back(Segment(victim_center.first*scala1, victim_center.second*scala1, victim_center.first*scala1-10, victim_center.second*scala1+10));
+        std::pair<double, double> victim_center = calcCentroid(victim_list[i].second);
+        segments.push_back(
+                Segment(victim_center.first * scala1, victim_center.second * scala1, victim_center.first * scala1 + 10,
+                        victim_center.second * scala1 - 10));
+        segments.push_back(
+                Segment(victim_center.first * scala1, victim_center.second * scala1, victim_center.first * scala1 + 10,
+                        victim_center.second * scala1 + 10));
+        segments.push_back(
+                Segment(victim_center.first * scala1, victim_center.second * scala1, victim_center.first * scala1 - 10,
+                        victim_center.second * scala1 - 10));
+        segments.push_back(
+                Segment(victim_center.first * scala1, victim_center.second * scala1, victim_center.first * scala1 - 10,
+                        victim_center.second * scala1 + 10));
     }
 
 
     for (int i = 0; i < borders.size(); i++) {
         //cv::line(image, cv::Point(borders[i].x, borders[i].y), cv::Point(5, 0), cv::Scalar(255, 255, 255), 2, 1);
         if (i <= borders.size() - 2) {
-            segments.push_back(Segment(borders[i].x*scala1, borders[i].y*scala1, borders[i + 1].x*scala1, borders[i + 1].y*scala1));
+            segments.push_back(Segment(borders[i].x * scala1, borders[i].y * scala1, borders[i + 1].x * scala1,
+                                       borders[i + 1].y * scala1));
         } else {
-            segments.push_back(Segment(borders[i].x * scala1, borders[i].y * scala1, borders[0].x * scala1, borders[0].y * scala1));
+            segments.push_back(Segment(borders[i].x * scala1, borders[i].y * scala1, borders[0].x * scala1,
+                                       borders[0].y * scala1));
         }
     }
 
@@ -100,43 +112,53 @@ void Voronoi::calculate(const std::vector<Polygon>& obstacle_list,const Polygon&
         Polygon v = obstacle_list[i];
 
         for (int j = 0; j < obstacle_list[i].size(); j++) {
-            if(j<=v.size()-2){
+            if (j <= v.size() - 2) {
                 //cv::line( image, cv::Point(v[j].x*500, v[j].y*500), cv::Point(v[(j+1)].x*500, v[(j+1)].y*500), cv::Scalar( 255, 255, 255 ),  2, 1 );
-                segments.push_back(Segment(v[j].x*scala1, v[j].y*scala1, v[j+1].x*scala1, v[j+1].y*scala1));
-            }else{
+                segments.push_back(Segment(v[j].x * scala1, v[j].y * scala1, v[j + 1].x * scala1, v[j + 1].y * scala1));
+            } else {
                 //cv::line( image, cv::Point(v[j].x*500, v[j].y*500), cv::Point(v[0].x*500, v[0].y*500), cv::Scalar( 255, 255, 255 ),  2, 1 );
-                segments.push_back(Segment(v[j].x*scala1, v[j].y*scala1, v[0].x*scala1, v[0].y*scala1));
+                segments.push_back(Segment(v[j].x * scala1, v[j].y * scala1, v[0].x * scala1, v[0].y * scala1));
             }
         }
     }
 
 
-    for(int i = 0; i<matrix_size; i++){
-            segments.push_back(Segment(test_vector[i][0],test_vector[i][1] ,test_vector[i][2],test_vector[i][3]));
+    for (int i = 0; i < matrix_size; i++) {
+        segments.push_back(Segment(test_vector[i][0], test_vector[i][1], test_vector[i][2], test_vector[i][3]));
     }
 
     construct_voronoi(points.begin(), points.end(), segments.begin(), segments.end(), &vd);
 
 }
 
-void Voronoi::draw(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd){
+void Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
+                   const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
+                   const float y, const float theta, voronoi_diagram<double> &vd) {
 
-    cv::Mat image = cv::Mat::zeros( 600, 1000, CV_8UC3 );
-
+    cv::Mat image = cv::Mat::zeros(600, 1000, CV_8UC3);
 
 
     for (int i = 0; i < victim_list.size(); i++) {
-        std::pair<double,double> victim_center = calcCentroid(victim_list[i].second);
-        cv::line( image, cv::Point( victim_center.first*scala1, victim_center.second*scala1 ), cv::Point( victim_center.first*scala1+10, victim_center.second*scala1-10), cv::Scalar( 255, 127 ,0 ),  2, 1 );
-        cv::line( image, cv::Point( victim_center.first*scala1, victim_center.second*scala1 ), cv::Point( victim_center.first*scala1+10, victim_center.second*scala1+10), cv::Scalar( 255, 127 ,0 ),  2, 1 );
-        cv::line( image, cv::Point( victim_center.first*scala1, victim_center.second*scala1 ), cv::Point( victim_center.first*scala1-10, victim_center.second*scala1-10), cv::Scalar( 255, 127 ,0 ),  2, 1 );
-        cv::line( image, cv::Point( victim_center.first*scala1, victim_center.second*scala1 ), cv::Point( victim_center.first*scala1-10, victim_center.second*scala1+10), cv::Scalar( 255, 127 ,0 ),  2, 1 );
+        std::pair<double, double> victim_center = calcCentroid(victim_list[i].second);
+        cv::line(image, cv::Point(victim_center.first * scala1, victim_center.second * scala1),
+                 cv::Point(victim_center.first * scala1 + 10, victim_center.second * scala1 - 10),
+                 cv::Scalar(255, 127, 0), 2, 1);
+        cv::line(image, cv::Point(victim_center.first * scala1, victim_center.second * scala1),
+                 cv::Point(victim_center.first * scala1 + 10, victim_center.second * scala1 + 10),
+                 cv::Scalar(255, 127, 0), 2, 1);
+        cv::line(image, cv::Point(victim_center.first * scala1, victim_center.second * scala1),
+                 cv::Point(victim_center.first * scala1 - 10, victim_center.second * scala1 - 10),
+                 cv::Scalar(255, 127, 0), 2, 1);
+        cv::line(image, cv::Point(victim_center.first * scala1, victim_center.second * scala1),
+                 cv::Point(victim_center.first * scala1 - 10, victim_center.second * scala1 + 10),
+                 cv::Scalar(255, 127, 0), 2, 1);
 
     }
 
 
-    for(int i = 0; i<matrix_size; i++){
-        cv::line( image, cv::Point( test_vector[i][0], test_vector[i][1] ), cv::Point( test_vector[i][2], test_vector[i][3]), cv::Scalar( 255, 255, 255 ),  2, 1 );
+    for (int i = 0; i < matrix_size; i++) {
+        cv::line(image, cv::Point(test_vector[i][0], test_vector[i][1]),
+                 cv::Point(test_vector[i][2], test_vector[i][3]), cv::Scalar(255, 255, 255), 2, 1);
     }
 
     for (int i = 0; i < borders.size(); i++) {
@@ -155,10 +177,12 @@ void Voronoi::draw(const std::vector<Polygon>& obstacle_list,const Polygon& bord
 
         for (int j = 0; j < obstacle_list[i].size(); j++) {
             //segments.push_back(Segment(v[j].x, v[j].y, v[j+1%obstacle_list[i].size()].x, v[j+1%obstacle_list[i].size()].y));
-            if(j<=v.size()-2){
-                cv::line( image, cv::Point(v[j].x*scale, v[j].y*scale), cv::Point(v[(j+1)].x*scale, v[(j+1)].y*scale), cv::Scalar( 255, 255, 255 ),  2, 1 );
-            }else{
-                cv::line( image, cv::Point(v[j].x*scale, v[j].y*scale), cv::Point(v[0].x*scale, v[0].y*scale), cv::Scalar( 255, 255, 255 ),  2, 1 );
+            if (j <= v.size() - 2) {
+                cv::line(image, cv::Point(v[j].x * scale, v[j].y * scale),
+                         cv::Point(v[(j + 1)].x * scale, v[(j + 1)].y * scale), cv::Scalar(255, 255, 255), 2, 1);
+            } else {
+                cv::line(image, cv::Point(v[j].x * scale, v[j].y * scale), cv::Point(v[0].x * scale, v[0].y * scale),
+                         cv::Scalar(255, 255, 255), 2, 1);
 
             }
         }
@@ -174,8 +198,8 @@ void Voronoi::draw(const std::vector<Polygon>& obstacle_list,const Polygon& bord
                 std::cout << "edge: x1: " << it->vertex0()->x() << " y1: " << it->vertex0()->y() << " \t  x2 "
                           << it->vertex1()->x()
                           << " y2: " << it->vertex1()->y() << std::endl;
-                cv::line(image, cv::Point(it->vertex0()->x() , it->vertex0()->y() ),
-                         cv::Point(it->vertex1()->x() , it->vertex1()->y() ), cv::Scalar(110, 220, 0), 1, 8);
+                cv::line(image, cv::Point(it->vertex0()->x(), it->vertex0()->y()),
+                         cv::Point(it->vertex1()->x(), it->vertex1()->y()), cv::Scalar(110, 220, 0), 1, 8);
 
             }
         }
@@ -183,7 +207,7 @@ void Voronoi::draw(const std::vector<Polygon>& obstacle_list,const Polygon& bord
 
     for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
         std::cout << "vertex: x1: " << it->x() << " \t y1: " << it->y() << std::endl;
-        cv::circle(image, cv::Point(it->x() , it->y() ), 1, cv::Scalar(0, 0, 255), 2, 8, 0);
+        cv::circle(image, cv::Point(it->x(), it->y()), 1, cv::Scalar(0, 0, 255), 2, 8, 0);
     }
 /*
     for (voronoi_diagram<double>::const_cell_iterator it = vd.cells().begin(); it != vd.cells().end(); ++it) {
@@ -192,7 +216,7 @@ void Voronoi::draw(const std::vector<Polygon>& obstacle_list,const Polygon& bord
     }
     */
 
-    cv::imshow("Voronoi",image);
-    cv::waitKey( 0 );
+    cv::imshow("Voronoi", image);
+    cv::waitKey(0);
 
 }
