@@ -13,6 +13,25 @@
 
 #include "include/dubins.hpp"
 #include "include/process_arena.hpp"
+#include "include/Voronoi.hpp"
+/*
+//utilizzare per rettangolo che ingloba il poligono e stima dell'area tra poligoni
+#include <iostream>
+
+#include "include/boost/geometry.hpp"
+#include "include/boost/geometry/geometries/box.hpp"
+#include "include/boost/geometry/geometries/point_xy.hpp"
+#include "include/boost/geometry/geometries/polygon.hpp"
+#include "include/boost/geometry/io/wkt/wkt.hpp"
+
+#include <deque>
+
+#include <boost/foreach.hpp>
+ */
+
+#include "include/find_collision.hpp"
+
+//namespace geom = boost::geometry;
 
 // x pc arena: us,ps robotics robtics
 //ar_lanch
@@ -21,6 +40,7 @@
 namespace student {
 
  int image_index = 0;
+
 
 //  vedi libreria
 /*
@@ -34,6 +54,7 @@ namespace student {
 	char c;
 	cv::imshow(topic, img_in);
 	c = cv::waitKey(30);
+
 	
 	//std::cin >> c;
 	if(c=='s'){
@@ -209,28 +230,28 @@ namespace student {
   }
   */
 
-  bool planPath(const Polygon& borders, const std::vector<Polygon>& obstacle_list, const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, Path& path, const string& config_folder){
-      double xf = 1.28;
-      double yf = 1.03;
-
-      for(int i = 0; i < borders.size(); i++){
-        cout << "Border: " << borders[i].x << " - " << borders[i].y << endl;
-      }
 
 
-      for(int i = 0; i < gate.size(); i++){
-        cout << "Gate: " << gate[i].x << " - " << gate[i].y << endl;
-      }
-      
-      Dubins dub;
-      dub.setParams(x, y, 0, xf, yf, M_PI/2, 10.0);
-      pair<int, curve> ret = dub.shortest_path();
-      curve cur = ret.second;
 
-      cout << "Curva selezionata: " << ret.first << endl;
-      cout << "lunghezza totale: "  << cur.L << endl;
+  bool planPath(const Polygon& borders, const std::vector<Polygon>& obstacle_list, const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, Path& path, const string& config_folder) {
+        double xf = 1.28;
+        double yf = 1.03;
 
-      path = dub.getPath(cur);
-  }
+        for (int i = 0; i < borders.size(); i++) {
+            cout << "Border: " << borders[i].x << " - " << borders[i].y << endl;
+        }
+
+        for (int i = 0; i < gate.size(); i++) {
+            cout << "Gate: " << gate[i].x << " - " << gate[i].y << endl;
+        }
+
+        voronoi_diagram<double> vd;
+        Voronoi v;
+        v.calculate(obstacle_list,borders,victim_list,gate,x,y,theta,vd);
+        v.draw(obstacle_list,borders,victim_list,gate,x,y,theta,vd);
+
+        //Find_collision f;
+        //std::cout << f.robot_obstacles_intersection(obstacle_list, x, y, theta);
+    }
 }
 

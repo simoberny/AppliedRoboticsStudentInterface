@@ -22,6 +22,9 @@ include_directories(
 add_executable(calibrate
   src/camera_calibration.cpp
   )
+add_executable(test
+  src/test_envelop.cpp
+  )
 
 
 ## Add executables
@@ -43,7 +46,8 @@ add_library(student SHARED
    src/find_victim.cpp
    src/dubins.cpp
    src/loadImage.cpp
-)
+        src/find_collision.cpp src/include/find_collision.hpp
+        src/Voronoi.cpp src/include/Voronoi.hpp)
 
 ## Link with libraries 
 target_link_libraries(student
@@ -57,3 +61,4 @@ target_link_libraries(calibrate
 target_link_libraries(test1
   dubins
 )
+

@@ -1,0 +1,1 @@
+/usr/bin/c++  -g  -rdynamic CMakeFiles/test1.dir/src/test_dubins.cpp.o  -o test1 -Wl,-rpath,/home/osboxes/workspace/project/cmake-build-debug libdubins.so 
