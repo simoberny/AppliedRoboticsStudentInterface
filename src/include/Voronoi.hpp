@@ -46,7 +46,7 @@ public:
     };
 
         Voronoi();
-        void calculate(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd);
+        void calculate(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd, Voronoi::Point& robot_center,std::vector<std::pair<int,Voronoi::Point>>& victims_center,Voronoi::Point& gate_center);//Very Important Point
         void draw(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd, const std::vector<std::pair<int, Voronoi::Point> > te);
         std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double>& vd);
 };

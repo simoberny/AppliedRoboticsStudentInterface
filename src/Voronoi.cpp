@@ -197,7 +197,7 @@ void compute_triangle_robot(const Polygon& borders,const float x, const float y,
 
 
 
-    void Voronoi::calculate(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd){
+    void Voronoi::calculate(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd,Voronoi::Point& robot_center,std::vector<std::pair<int,Voronoi::Point>>& victims_center,Voronoi::Point& gate_center){
     std::vector<Point> points;
     std::vector<Segment> segments;
         //rectangle_gate(borders,gate,triangle_gate);
@@ -207,17 +207,24 @@ void compute_triangle_robot(const Polygon& borders,const float x, const float y,
 
     segments.push_back(Segment(triangle_robot[0][0]*scala1, triangle_robot[0][1]*scala1, triangle_robot[1][0]*scala1, triangle_robot[1][1]*scala1));
     segments.push_back(Segment(triangle_robot[0][0]*scala1, triangle_robot[0][1]*scala1, triangle_robot[2][0]*scala1, triangle_robot[2][1]*scala1));
+    robot_center.a = triangle_robot[0][0];
+    robot_center.b = triangle_robot[0][1];
+
 
     std::vector<std::vector<double>> triangle_gate;
     compute_triangle_gate(borders,gate,triangle_gate);
 
     segments.push_back(Segment(triangle_gate[0][0]*scala1, triangle_gate[0][1]*scala1, triangle_gate[1][0]*scala1, triangle_gate[1][1]*scala1));
     segments.push_back(Segment(triangle_gate[0][0]*scala1, triangle_gate[0][1]*scala1, triangle_gate[2][0]*scala1, triangle_gate[2][1]*scala1));
+    gate_center.a = triangle_gate[0][0];
+    gate_center.b = triangle_gate[0][1];
+
 
 
     // croce sulle vittime per forzare il diagramma di voronoi a passare sopra
     for (int i = 0; i < victim_list.size(); i++) {
         std::pair<double, double> victim_center = calcCentroid(victim_list[i].second);
+        victims_center.emplace_back(std::make_pair(victim_list[i].first,Voronoi::Point(victim_center.first, victim_center.second)));
         segments.push_back(
                 Segment(victim_center.first * scala1, victim_center.second * scala1, victim_center.first * scala1 + 10,
                         victim_center.second * scala1 - 10));
