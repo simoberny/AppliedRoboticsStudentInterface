@@ -275,12 +275,18 @@ namespace student {
     bool planPath(const Polygon &borders, const std::vector<Polygon> &obstacle_list,
                   const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
                   const float y, const float theta, Path &path, const string &config_folder) {
+
         voronoi_diagram<double> vd;
         Voronoi v;
-        v.calculate(obstacle_list, borders, victim_list, gate, x, y, theta, vd);
-        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd);
 
-        //v.draw(obstacle_list, borders, victim_list, gate, x, y, theta, vd, t);
+        std::vector<std::pair<int,Voronoi::Point>>victims_center;
+        Voronoi::Point robot_center(0,0);
+        Voronoi::Point gate_center(0,0);
+
+        v.calculate(obstacle_list, borders, victim_list, gate, x, y, theta, vd,robot_center,victims_center,gate_center);
+        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd, robot_center, victims_center, gate_center);
+
+        v.draw(obstacle_list, borders, victim_list, gate, x, y, theta, vd, t);
 
         std::cout << "Numero punti path: " << t.size() << std::endl;
 
