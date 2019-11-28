@@ -16,6 +16,10 @@
 //#include "/home/osboxes/Desktop/boost_1_71_0/boost/polygon/voronoi.hpp"
 #include <boost/polygon/voronoi.hpp>
 
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/linestring.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+
 using boost::polygon::voronoi_builder;
 using boost::polygon::voronoi_diagram;
 
@@ -25,13 +29,13 @@ public:
     struct Point {
         double a;
         double b;
-        Point (int x, int y) : a(x), b(y) {}
+        Point (double x, double y) : a(x), b(y) {}
     };
 
     struct Segment {
         Point p0;
         Point p1;
-        Segment (int x1, int y1, int x2, int y2) : p0(x1, y1), p1(x2, y2) {}
+        Segment (double x1, double y1, double x2, double y2) : p0(x1, y1), p1(x2, y2) {}
     };
 
         Voronoi();
