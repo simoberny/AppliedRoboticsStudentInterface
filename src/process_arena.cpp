@@ -1,9 +1,11 @@
 #include "include/process_arena.hpp"
 #include "include/find_victim.hpp"
+#include "include/clipper.hpp"
+
 
 //TODO: x ottimizzare la conversion in hsv potrebbe essere fatta 1 solo vaolta!
 
-bool processObstacles(const cv::Mat &img_in, const double scale, std::vector<Polygon> &obstacle_list) {
+bool processObstacles(const cv::Mat &img_in, const double scale, std::vector<Polygon> &obstacle_list, int radius) {
 
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
@@ -22,19 +24,48 @@ bool processObstacles(const cv::Mat &img_in, const double scale, std::vector<Pol
     cv::findContours(red_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     drawContours(contours_img, contours, -1, cv::Scalar(40, 190, 40), 1, cv::LINE_AA);
 
-    std::cout << "N. contours: " << contours.size() << std::endl;
+    //std::cout << "N. contours: " << contours.size() << std::endl;
     for (int i = 0; i < contours.size(); ++i) {
-        std::cout << (i + 1) << ") Contour size: " << contours[i].size() << std::endl;
+        //std::cout << (i + 1) << ") Contour size: " << contours[i].size() << std::endl;
         approxPolyDP(contours[i], approx_curve, 3, true);
 
         Polygon scaled_contour;
         for (const auto &pt: approx_curve) {
             scaled_contour.emplace_back(pt.x / scale, pt.y / scale);
         }
-        obstacle_list.push_back(scaled_contour);
+        ClipperLib::Path srcPoly;
+        ClipperLib::Paths newPoly;
+
+        Polygon enlargePoly;
+
+        const double INT_ROUND = 1000;
+
+        for(size_t a = 0; a < scaled_contour.size(); ++a){
+            int x = scaled_contour[a].x * INT_ROUND;
+            int y = scaled_contour[a].y * INT_ROUND;
+
+            srcPoly << ClipperLib::IntPoint(x, y);
+        }
+
+        ClipperLib::ClipperOffset co;
+
+        co.AddPath(srcPoly, ClipperLib::jtSquare, ClipperLib::etClosedPolygon);
+
+        co.Execute(newPoly, radius);
+
+        for(const ClipperLib::Path &path: newPoly){
+            for(const ClipperLib::IntPoint &pt: path){
+                double x = pt.X / INT_ROUND;
+                double y = pt.Y / INT_ROUND;
+                enlargePoly.emplace_back(x, y);
+            }
+        }
+
+        obstacle_list.push_back(enlargePoly);
+
         contours_approx.push_back(approx_curve);
         drawContours(img_in, contours_approx, -1, cv::Scalar(255, 0, 0), 3, cv::LINE_AA);
-        std::cout << "   Approximated contour size: " << approx_curve.size() << std::endl;
+        //std::cout << "   Approximated contour size: " << approx_curve.size() << std::endl;
     }
     //std::cout << std::endl;
     //cv::imshow("Original", hsv_img);
@@ -68,8 +99,8 @@ bool processGate(const cv::Mat &img_in, const double scale, Polygon &gate) {
 
     for (auto &contour : contours) {
         const double area = cv::contourArea(contour);
-        std::cout << "AREA " << area << std::endl;
-        std::cout << "SIZE: " << contours.size() << std::endl;
+        //std::cout << "AREA " << area << std::endl;
+        //std::cout << "SIZE: " << contours.size() << std::endl;
         if (area > 500) {
             for (int i = 0; i < 20; i++) {
                 approxPolyDP(contour, approx_curve, i, true);
@@ -132,7 +163,7 @@ bool processVictims(const cv::Mat &img_in, const double scale, std::vector<std::
             contours_approx = {approx_curve};
 
             drawContours(img_in, contours_approx, -1, cv::Scalar(255, 100, 180), 3, cv::LINE_AA);
-            std::cout << "   Approximated contour size: " << approx_curve.size() << std::endl;
+            //std::cout << "   Approximated contour size: " << approx_curve.size() << std::endl;
         }
     }
 

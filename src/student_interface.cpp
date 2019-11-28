@@ -10,6 +10,7 @@
 
 #include <experimental/filesystem>
 #include <sstream>
+#include <tuple>
 
 #include "include/dubins.hpp"
 #include "include/process_arena.hpp"
@@ -196,12 +197,68 @@ namespace student {
         //cv::waitKey(20);
     }
 
+    // Recursive function to get all the combination with repetition
+    void getPermutationRec(int set[], const vector<int> iter, int n, int k, vector<vector<int>> &des) {
+        if (k == 0) {
+            des.push_back(iter);
+            /*for(int i = 0; i < iter.size(); i++){
+                std::cout << iter[i];
+            }
+
+            std::cout << endl;*/
+            return;
+        }
+
+        for (int i = 0; i < n; i++) {
+            vector<int> temp = iter;
+            temp.push_back(set[i]);
+            getPermutationRec(set, temp, n, k - 1, des);
+        }
+    }
+
+    // Wrapper for permutation recursive function
+    vector<vector<int>> getPermutation(int set[], const vector<int>& iter, int n, int k) {
+        // Global vector to save all the possible victim descent
+        vector<vector<int>> descent;
+        // Call the recursive version
+        getPermutationRec(set, iter, n, k, descent);
+        return descent;
+    }
+
+    // Function to get the centroid point of a Polygon
+    std::pair<double, double> calcCentroid(const Polygon& p) {
+        double max_x = 0, max_y = 0, min_x = 1000, min_y = 1000;
+
+        for (auto a : p) {
+            if (a.x > max_x) max_x = a.x;
+            if (a.x < min_x) min_x = a.x;
+            if (a.y > max_y) max_y = a.y;
+            if (a.y < min_y) min_y = a.y;
+        }
+
+        double cx = max_x - ((max_x - min_x) / 2);
+        double cy = max_y - ((max_y - min_y) / 2);
+
+        return make_pair(cx, cy);
+    }
+
+    // Comparator function to sort a vector containing tuple
+    bool comparePair(tuple<double, double, double> i1, tuple<double, double, double> i2) {
+        return (get<2>(i1) < get<2>(i2));
+    }
+
+    bool compareLength(pair<int, double> i1, pair<int, double> i2) {
+        return (i1.second < i2.second);
+    }
+
     bool processMap(const cv::Mat &img_in, const double scale, std::vector<Polygon> &obstacle_list,
                     std::vector<std::pair<int, Polygon>> &victim_list, Polygon &gate,
                     const std::string &config_folder) {
+        //Robot radius
+        int robot_r = 5;
 
         std::cout << "enter in process map" << std::endl;
-        const bool res1 = processObstacles(img_in, scale, obstacle_list);
+        const bool res1 = processObstacles(img_in, scale, obstacle_list, robot_r);
         if (!res1) std::cout << "processObstacles return false" << std::endl;
         const bool res2 = processGate(img_in, scale, gate);
         if (!res2) std::cout << "processGate return false" << std::endl;
@@ -218,24 +275,155 @@ namespace student {
     bool planPath(const Polygon &borders, const std::vector<Polygon> &obstacle_list,
                   const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
                   const float y, const float theta, Path &path, const string &config_folder) {
-        double xf = 1.28;
-        double yf = 1.03;
-
-        for (int i = 0; i < borders.size(); i++) {
-            cout << "Border: " << borders[i].x << " - " << borders[i].y << endl;
-        }
-
-        for (int i = 0; i < gate.size(); i++) {
-            cout << "Gate: " << gate[i].x << " - " << gate[i].y << endl;
-        }
-
         voronoi_diagram<double> vd;
         Voronoi v;
         v.calculate(obstacle_list, borders, victim_list, gate, x, y, theta, vd);
-        v.draw(obstacle_list, borders, victim_list, gate, x, y, theta, vd);
+        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd);
 
-        //Find_collision f;
-        //std::cout << f.robot_obstacles_intersection(obstacle_list, x, y, theta);
+        //v.draw(obstacle_list, borders, victim_list, gate, x, y, theta, vd, t);
+
+        std::cout << "Numero punti path: " << t.size() << std::endl;
+
+        Path final_path;
+
+        vector<pair<int, double>> descent_leading;
+
+        //System to now how much time takes the plan
+        auto started = std::chrono::high_resolution_clock::now();
+
+        //Initial robot position
+        double rob_x = x;
+        double rob_y = y;
+        double rob_theta = 0;
+
+        //Possible angles
+        //vector<double> angles = {0, M_PI / 2, M_PI, -M_PI / 2};
+
+        //Gate centroid = final position
+        pair<double, double> gate_centroid = calcCentroid(gate);
+        double x_gate = gate_centroid.first;
+        double y_gate = gate_centroid.second;
+
+        /*vector<int> te;
+        //Generate array of combination elements
+        int angle_idx[angles.size()];
+        for(int i = 0; i < angles.size(); i++)
+            angle_idx[i] = i;*/
+
+        // Numero di punti in cui passare
+        int k = t.size();
+
+        std::cout << "DIMENSIONE PUNTI:" << k << std::endl;
+
+        //Get all the permutation of angles over victims (combinations k angles over n victims)
+        //vector<vector<int>> descent = getPermutation(angle_idx, te, angles.size(), k);
+
+        //std::cout << "Discese: " << descent.size() << std::endl;
+
+        //Foreach angles permutation
+        /*for (int i = 0; i < descent.size(); i++) {
+            //std::cout << "Discesa numero: " << i << std::endl;
+            //Re-initialize every loop
+
+            //Descent actual length
+            double total_L = 0;*/
+
+        rob_x = x;
+        rob_y = y;
+        rob_theta = 0;
+
+        //Foreach victim to reach
+        for (int a = 0; a < k; a++) {
+            int id;
+            Voronoi::Point p(0,0);
+            double xf, yf, angle;
+            tie(id, p, angle) = t[a];
+
+            xf = p.a / 500;
+            yf = p.b / 500;
+
+            //Get the dubins curve
+            Dubins dub;
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 50.0);
+
+            pair<int, curve> ret = dub.shortest_path();
+            curve cur = ret.second;
+
+            //Adds the partial dubins length to total
+            //total_L = total_L + cur.L;
+
+            Path temp = dub.getPath(cur);
+            for (const auto &point : temp.points) {
+                final_path.points.push_back(point);
+            }
+
+            //Sets the actual robot position
+            rob_x = xf;
+            rob_y = yf;
+            rob_theta = angle;
+        }
+
+            /*
+
+            //Save all the descent length and index to classify them
+            if(total_L > 0) descent_leading.emplace_back(make_pair(i, total_L));
+        }*/
+
+        //Order index by total path length
+        //sort(descent_leading.begin(), descent_leading.end(), compareLength);
+
+        //Last parameter re-initialization
+        /*rob_x = x;
+        rob_y = y;
+        rob_theta = 0;
+
+        //Get the best id path
+        int best_id = descent_leading[0].first;*/
+
+        //Get the path of the selected descent
+        /*for (int a = 0; a < t.size(); a++) {
+            double xf, yf, distance;
+            xf = t[a].second.a / 500;
+            yf = t[a].second.b / 500;
+
+            Dubins dub;
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angles[descent[best_id][a]], 10.0);
+
+            cout << "Vittima " << a + 1 << " angolo = " << angles[descent[best_id][a]] << endl;
+
+            pair<int, curve> ret = dub.shortest_path();
+            curve cur = ret.second;
+
+            Path temp = dub.getPath(cur);
+            for (const auto &point : temp.points) {
+                final_path.points.push_back(point);
+            }
+
+            rob_x = xf;
+            rob_y = yf;
+            rob_theta = angles[descent[best_id][a]];
+        }*/
+
+        //Add the last target, the gate
+        Dubins dub;
+        dub.setParams(rob_x, rob_y, rob_theta, x_gate, y_gate, M_PI / 2, 11.0);
+
+        pair<int, curve> ret = dub.shortest_path();
+        curve cur = ret.second;
+
+        Path temp = dub.getPath(cur);
+        for (const auto &point : temp.points) {
+            final_path.points.push_back(point);
+        }
+
+
+        auto done = std::chrono::high_resolution_clock::now();
+
+        cout << "Tempo di esecuzione: " << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << endl;
+
+        //Send the path to the robot
+        path = final_path;
+
     }
 }
 

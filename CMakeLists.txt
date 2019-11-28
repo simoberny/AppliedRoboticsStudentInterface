@@ -47,6 +47,7 @@ add_library(student SHARED
         src/find_victim.cpp
         src/dubins.cpp
         src/loadImage.cpp
+        src/clipper.cpp
         src/find_collision.cpp src/include/find_collision.hpp
         src/Voronoi.cpp src/include/Voronoi.hpp)
 

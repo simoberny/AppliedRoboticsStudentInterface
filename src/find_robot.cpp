@@ -35,12 +35,12 @@ namespace student {
         if (approx_curve.size() == 3) {
             double area = cv::contourArea(approx_curve);
 
-            std::cout << "-----Aprox Contour size: " << approx_curve.size() << std::endl;
+            /*std::cout << "-----Aprox Contour size: " << approx_curve.size() << std::endl;
             std::cout << "Area: " << area << std::endl;
             std::cout << "punti trovati: 1 " << std::endl;
             std::cout << " x " << approx_curve[0].x << " y " << approx_curve[0].y << std::endl;
             std::cout << " x " << approx_curve[1].x << " y " << approx_curve[1].y << std::endl;
-            std::cout << " x " << approx_curve[2].x << " y " << approx_curve[2].y << std::endl;
+            std::cout << " x " << approx_curve[2].x << " y " << approx_curve[2].y << std::endl;*/
 
             for (const auto &pt: approx_curve) {
                 triangle.emplace_back(pt.x / scale, pt.y / scale);
