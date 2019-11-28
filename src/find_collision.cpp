@@ -12,7 +12,7 @@
 
 #include "include/find_collision.hpp"
 
-Find_collision::Find_collision(){     // Constructor
+Find_collision::Find_collision() {     // Constructor
 
 }
 
@@ -25,7 +25,9 @@ typedef boost::geometry::model::d2::point_xy<double> Point1;
 typedef boost::geometry::model::linestring<Point1> Linestring;
 
 
-bool Find_collision::robot_obstacles_intersection(const std::vector<Polygon>& obstacle_list, const float x, const float y, const float theta) {
+bool
+Find_collision::robot_obstacles_intersection(const std::vector<Polygon> &obstacle_list, const float x, const float y,
+                                             const float theta) {
 
     bool result = false;
     polygon robot;
@@ -33,9 +35,9 @@ bool Find_collision::robot_obstacles_intersection(const std::vector<Polygon>& ob
     //geom::append(ls1, Point1(0.0, 0.0));
     //geom::append(ls1, Point1(1.0, 1.0));
     geom::append(robot.outer(), point_t(0.043, 0.085));
-    geom::append(robot.outer(), point_t(0.04, 0.08+0.1));
-    geom::append(robot.outer(), point_t(0.04+0.1, 0.08+0.1));
-    geom::append(robot.outer(), point_t(0.04+0.1, 0.08));
+    geom::append(robot.outer(), point_t(0.04, 0.08 + 0.1));
+    geom::append(robot.outer(), point_t(0.04 + 0.1, 0.08 + 0.1));
+    geom::append(robot.outer(), point_t(0.04 + 0.1, 0.08));
 
     std::cout << "area quadrato  " << boost::geometry::area(robot) << std::endl;
 
@@ -56,13 +58,13 @@ bool Find_collision::robot_obstacles_intersection(const std::vector<Polygon>& ob
         int k = 0;
         std::cout << " \t AREA intersezione :" << std::endl;
         BOOST_FOREACH(polygon const &p, output) {
-                        std::cout << k++ << ": " << boost::geometry::area(p) << "risultato: "<< result << std::endl;
+                        std::cout << k++ << ": " << boost::geometry::area(p) << "risultato: " << result << std::endl;
 
-        }
+                    }
 
     }
 
-return result;
+    return result;
 
 }
 

@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <sstream>
 
-bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Polygon>& obstacle_list);
+bool processObstacles(const cv::Mat& img_in, const double scale, std::vector<Polygon>& obstacle_list, int radius);
 bool processGate(const cv::Mat& img_in, const double scale, Polygon& gate);
 bool processVictims(const cv::Mat& img_in, const double scale, std::vector<std::pair<int,Polygon>>& victim_list, const std::string& config_folder);
 

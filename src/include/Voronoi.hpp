@@ -14,7 +14,14 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 //#include "/home/osboxes/Desktop/boost_1_71_0/boost/polygon/voronoi.hpp"
+#include <fstream>
+#include <vector>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/polygon/voronoi.hpp>
+#include <math.h>
+#include <tuple>
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/linestring.hpp>
@@ -40,7 +47,8 @@ public:
 
         Voronoi();
         void calculate(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd);
-        void draw(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd);
+        void draw(const std::vector<Polygon>& obstacle_list,const Polygon& borders,const std::vector<std::pair<int,Polygon>>& victim_list, const Polygon& gate, const float x, const float y, const float theta, voronoi_diagram<double>& vd, const std::vector<std::pair<int, Voronoi::Point> > te);
+        std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double>& vd);
 };
 
 
