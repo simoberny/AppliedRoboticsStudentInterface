@@ -271,12 +271,11 @@ void compute_triangle_robot(const Polygon& borders,const float x, const float y,
 void Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
                    const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
                    const float y, const float theta, voronoi_diagram<double> &vd,
-                   const std::vector<std::pair<int, Voronoi::Point> > shortest) {
+                   const std::vector<std::tuple<int, Voronoi::Point, double> > shortest) {
 
 
     cv::Mat image = cv::Mat::zeros(600, 1000, CV_8UC3);
 
-    
     std::vector<std::vector<double>> triangle_gate;
     compute_triangle_gate(borders,gate,triangle_gate);
 
@@ -360,14 +359,14 @@ void Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &bor
     */
 
     for(int i = 0; i < shortest.size(); i++){
-        Voronoi::Point pos_node = shortest[i].second;
+        Voronoi::Point pos_node = get<1>(shortest[i]);
         cv::circle(image, cv::Point(pos_node.a, pos_node.b), 3, cv::Scalar(0, 210, 255), 3, 8, 0);
     }
 
     for(int i = 0; i < shortest.size() - 1; i++){
-        int node = shortest[i].first;
-        Voronoi::Point pos_node = shortest[i].second;
-        Voronoi::Point next_node = shortest[i+1].second;
+        int node = get<0>(shortest[i]);;
+        Voronoi::Point pos_node = get<1>(shortest[i]);
+        Voronoi::Point next_node = get<1>(shortest[i+1]);
 
         cv::line(image, cv::Point(pos_node.a, pos_node.b),
                  cv::Point(next_node.a, next_node.b), cv::Scalar(0, 220, 220), 2, 8);
@@ -414,7 +413,7 @@ void clean_path(std::vector<Voronoi::Point> vertex, std::vector<int> &path){
     for(int i = path.size() - 1; i > 0; i--){
         //Prune dell'albero
         double dist = sqrt(pow(vertex[path[i]].a - vertex[path[i-1]].a, 2) + pow(vertex[path[i]].b - vertex[path[i-1]].b, 2));
-        if(dist < 0.02){
+        if(dist < 0.1){
             std::cout << "Elimino: " << path[i-1] << std::endl;
             path.erase(path.begin() + (i-1));
 
@@ -449,7 +448,7 @@ bool coeff_higher(Voronoi::Point first, Voronoi::Point second, Voronoi::Point th
     std::cout << "P3: " << third.a << "," << third.b << std::endl;
     std::cout << "M1: " << m1 << " ; M2:" << m2 <<   " ; Diff: " << diff <<  std::endl;
 
-    return diff > 0.2;
+    return diff > 0.15;
 }
 
 std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd) {
@@ -505,7 +504,7 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
 
     std::vector<vertex_descriptor> p(num_vertices(g));
     std::vector<double> d(num_vertices(g));
-    vertex_descriptor s = vertex(0, g);
+    vertex_descriptor s = vertex(130, g);
 
     property_map<graph_t, vertex_index_t>::type indexmap = get(vertex_index, g);
 
@@ -526,14 +525,14 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
 
     std::vector<std::tuple<int, Voronoi::Point, double> > shortest_path;
 
-    int n = 545;
+    int n = 555;
     std::vector<int> path;
-    while (n != 0) {
+    while (n != 130) {
         path.push_back(n);
         n = p[n]; // you're one step closer to the source..
     }
 
-    path.push_back(0);
+    path.push_back(130);
 
     std::cout << "Cammino minimo: ";
     for(int i = 0; i < path.size(); i++){
@@ -556,10 +555,9 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
     for(int i = path.size() - 1; i >= 0; i--){
         //Prune dell'albero
         if(i == 0){
-            shortest_path.emplace_back(std::make_tuple(path[i], Voronoi::Point(vertex_map[path[i]].a * scala2, vertex_map[path[i]].b * scala2), 0));
-        }else if(i == path.size() - 1) {
             shortest_path.emplace_back(std::make_tuple(path[i], Voronoi::Point(vertex_map[path[i]].a * scala2, vertex_map[path[i]].b * scala2), M_PI/2));
-
+        }else if(i == path.size() - 1) {
+            shortest_path.emplace_back(std::make_tuple(path[i], Voronoi::Point(vertex_map[path[i]].a * scala2, vertex_map[path[i]].b * scala2), 0));
         }else if(i < path.size() - 1 && i != 0 ) {
             std::cout << "Archi: " << path[i + 1] << " ->" << path[i] << "->" << path[i - 1] << std::endl;
 
@@ -574,7 +572,6 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
     }
 
     std::cout << "Numero nodi: " << shortest_path.size() << std::endl;
-
 
     std::ofstream dot_file("/tmp/dijkstra-eg.dot");
 

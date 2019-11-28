@@ -333,7 +333,7 @@ namespace student {
         rob_theta = 0;
 
         //Foreach victim to reach
-        for (int a = 0; a < k; a++) {
+        for (int a = 1; a < k; a++) {
             int id;
             Voronoi::Point p(0,0);
             double xf, yf, angle;
@@ -344,7 +344,7 @@ namespace student {
 
             //Get the dubins curve
             Dubins dub;
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 50.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 10.0);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;
@@ -403,18 +403,6 @@ namespace student {
             rob_y = yf;
             rob_theta = angles[descent[best_id][a]];
         }*/
-
-        //Add the last target, the gate
-        Dubins dub;
-        dub.setParams(rob_x, rob_y, rob_theta, x_gate, y_gate, M_PI / 2, 11.0);
-
-        pair<int, curve> ret = dub.shortest_path();
-        curve cur = ret.second;
-
-        Path temp = dub.getPath(cur);
-        for (const auto &point : temp.points) {
-            final_path.points.push_back(point);
-        }
 
 
         auto done = std::chrono::high_resolution_clock::now();
