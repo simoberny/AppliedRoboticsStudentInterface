@@ -425,10 +425,11 @@ void Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &bor
 }
 
 using namespace boost;
+const double threshold_ricerca = 0.01;
 
 int get_pos_array(std::vector<Voronoi::Point> v, Voronoi::Point el) {
     for (int i = 0; i < v.size(); i++) {
-        if (v[i].a == el.a && v[i].b == el.b) return i;
+        if ((fabs(el.a - v[i].a) < threshold_ricerca) && (fabs(el.b - v[i].b) < threshold_ricerca)) return i;
     }
 
     return -1;
@@ -500,6 +501,11 @@ bool coeff_higher(Voronoi::Point first, Voronoi::Point second, Voronoi::Point th
     return diff > 0.15;
 }
 
+std::vector<int> get_shortest_path(int from, int to)
+{
+
+}
+
 std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd, Voronoi::Point &robot_center,
                                                                      std::vector<std::pair<int, Voronoi::Point>> &victims_center, Voronoi::Point &gate_center) {
     std::vector<Edge> edge_array;
@@ -507,20 +513,6 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
     std::vector<Voronoi::Point> vertex_map;
 
     int vertex_id = 0;
-
-    //Ottengo vertici posizioni chiave
-
-    int robot_pos = 0;
-    int gate_pos = 1;
-    std::vector<int> victim_pos;
-
-    vertex_map.emplace_back(robot_center);
-    vertex_map.emplace_back(gate_center);
-
-    for(int i = 0; i < victims_center.size(); i++){
-        vertex_map.emplace_back(victims_center[i].second);
-        victim_pos.emplace_back(i + 2);
-    }
 
     for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
         double x = it->x() / scala2;
@@ -552,6 +544,17 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         }
     }
 
+    //Ottengo vertici posizioni chiave
+
+    int robot_pos = get_pos_array(vertex_map, robot_center);
+    int gate_pos =  get_pos_array(vertex_map, gate_center);
+
+    std::vector<int> victim_pos;
+
+    for(int i = 0; i < victims_center.size(); i++){
+        victim_pos.emplace_back(get_pos_array(vertex_map, victims_center[i].second));
+    }
+
     int num_nodes = vertex_map.size();
     std::cout << "Numero: " << num_nodes << std::endl;
 
@@ -579,6 +582,8 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
                             10000, 0,
                             default_dijkstra_visitor());
 
+    
+
     std::cout << "distances and parents:" << std::endl;
     graph_traits<graph_t>::vertex_iterator vi, vend;
     for (tie(vi, vend) = vertices(g); vi != vend; ++vi) {
@@ -592,14 +597,17 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
     int from = gate_pos;
     std::vector<int> path;
 
-    for(int i = victim_pos.size() - 1; i >= 0; i--){
+    for(int i = 0; i <victim_pos.size() ; i++){
+        std::cout << "Vittina n: " << victim_pos[i] << std::endl;
         while (from != victim_pos[i]) {
             path.push_back(from);
             from = p[from]; // you're one step closer to the source..
         }
+
+        path.push_back(victim_pos[i]);
     }
 
-    while (from != gate_pos) {
+    while (from != robot_pos) {
         path.push_back(from);
         from = p[from]; // you're one step closer to the source..
     }

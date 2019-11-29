@@ -286,7 +286,7 @@ namespace student {
         v.calculate(obstacle_list, borders, victim_list, gate, x, y, theta, vd,robot_center,victims_center,gate_center);
         std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd, robot_center, victims_center, gate_center);
 
-        v.draw(obstacle_list, borders, victim_list, gate, x, y, theta, vd, t);
+        //v.draw(obstacle_list, borders, victim_list, gate, x, y, theta, vd, t);
 
         std::cout << "Numero punti path: " << t.size() << std::endl;
 
