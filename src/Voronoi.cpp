@@ -5,10 +5,6 @@
 #include "include/Voronoi.hpp"
 #include <math.h>
 
-const int scale = 500;
-const int scala1 = 500;
-const double scala2 = 500.0;
-
 namespace boost {
     namespace polygon {
 
@@ -44,9 +40,7 @@ namespace boost {
     }  // polygon
 }  // boost
 
-Voronoi::Voronoi() {     // Constructor
-
-}
+Voronoi::Voronoi() {   } // Constructor
 
 //const int test_vector[][4] = {{90,90,100,100},{100,100,110,90}};
 //const int test_vector[][4] = {{50,50,70,30},{50,50,70,70}};
@@ -105,7 +99,7 @@ distance_line_line(double l1_x1, double l1_y1, double l1_x2, double l1_y2, doubl
 
 void
 compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<std::vector<double>> &triangle_gate) {
-    double triangle_lenght = 0.03;
+    double triangle_length = 0.03;
     std::pair<double, double> gate_center = calcCentroid(gate);
     std::vector<double> v1 = {gate_center.first, gate_center.second};
     triangle_gate.emplace_back(v1);
@@ -151,15 +145,15 @@ compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<s
 
     //TODO: attenzione se non vengono trovati i 2 punti del triangolo con massima distanza dal bordo triangle vector non avrà 2 vettori di punti e la lettura dei valori del triangolo andrà out of boundaries killando il programma!!!
     //TODO: verificre con differenti angoli di partenza!!!S
-    std::vector<std::vector<double>> cross_vertex = {{gate_center.first + triangle_lenght,
+    std::vector<std::vector<double>> cross_vertex = {{gate_center.first + triangle_length,
                                                                                            gate_center.second -
-triangle_lenght},
-                                                     {gate_center.first + triangle_lenght, gate_center.second +
-                                                                                           triangle_lenght},
-                                                     {gate_center.first - triangle_lenght, gate_center.second -
-                                                                                           triangle_lenght},
-                                                     {gate_center.first - triangle_lenght, gate_center.second +
-                                                                                           triangle_lenght}};
+                                                                                           triangle_length},
+                                                     {gate_center.first + triangle_length, gate_center.second +
+                                                                                           triangle_length},
+                                                     {gate_center.first - triangle_length, gate_center.second -
+                                                                                           triangle_length},
+                                                     {gate_center.first - triangle_length, gate_center.second +
+                                                                                           triangle_length}};
     for (int i = 0; i < cross_vertex.size(); i++) {
 
         if (distance_line_point(x1, y1, x2, y2, cross_vertex[i][0], cross_vertex[i][1]) > distance) {
@@ -214,8 +208,7 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
 
 void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
                         const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
-                        const float y, const float theta, voronoi_diagram<double> &vd, Voronoi::Point &robot_center,
-                        std::vector<std::pair<int, Voronoi::Point>> &victims_center, Voronoi::Point &gate_center) {
+                        const float y, const float theta, voronoi_diagram<double> &vd) {
 
     std::vector<Point> points;
     std::vector<Segment> segments;
@@ -225,55 +218,55 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
     compute_triangle_robot(borders, x, y, theta, triangle_robot);
 
     segments.push_back(
-            Segment(triangle_robot[0][0] * scala1, triangle_robot[0][1] * scala1, triangle_robot[1][0] * scala1,
-                    triangle_robot[1][1] * scala1));
+            Segment(triangle_robot[0][0] * scale, triangle_robot[0][1] * scale, triangle_robot[1][0] * scale,
+                    triangle_robot[1][1] * scale));
     segments.push_back(
-            Segment(triangle_robot[0][0] * scala1, triangle_robot[0][1] * scala1, triangle_robot[2][0] * scala1,
-                    triangle_robot[2][1] * scala1));
-    robot_center.a = triangle_robot[0][0];
-    robot_center.b = triangle_robot[0][1];
+            Segment(triangle_robot[0][0] * scale, triangle_robot[0][1] * scale, triangle_robot[2][0] * scale,
+                    triangle_robot[2][1] * scale));
+    this->robot_center.a = triangle_robot[0][0];
+    this->robot_center.b = triangle_robot[0][1];
 
 
     std::vector<std::vector<double>> triangle_gate;
     compute_triangle_gate(borders, gate, triangle_gate);
 
-    segments.push_back(Segment(triangle_gate[0][0] * scala1, triangle_gate[0][1] * scala1, triangle_gate[1][0] * scala1,
-                               triangle_gate[1][1] * scala1));
-    segments.push_back(Segment(triangle_gate[0][0] * scala1, triangle_gate[0][1] * scala1, triangle_gate[2][0] * scala1,
-                               triangle_gate[2][1] * scala1));
-    gate_center.a = triangle_gate[0][0];
-    gate_center.b = triangle_gate[0][1];
+    segments.push_back(Segment(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale, triangle_gate[1][0] * scale,
+                               triangle_gate[1][1] * scale));
+    segments.push_back(Segment(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale, triangle_gate[2][0] * scale,
+                               triangle_gate[2][1] * scale));
+    this->gate_center.a = triangle_gate[0][0];
+    this->gate_center.b = triangle_gate[0][1];
 
 
 
     // croce sulle vittime per forzare il diagramma di voronoi a passare sopra
     for (int i = 0; i < victim_list.size(); i++) {
         std::pair<double, double> victim_center = calcCentroid(victim_list[i].second);
-        victims_center.emplace_back(
+        this->victims_center.emplace_back(
                 std::make_pair(victim_list[i].first, Voronoi::Point(victim_center.first, victim_center.second)));
         segments.push_back(
-                Segment(victim_center.first * scala1, victim_center.second * scala1, victim_center.first * scala1 + 10,
-                        victim_center.second * scala1 - 10));
+                Segment(victim_center.first * scale, victim_center.second * scale, victim_center.first * scale + 10,
+                        victim_center.second * scale - 10));
         segments.push_back(
-                Segment(victim_center.first * scala1, victim_center.second * scala1, victim_center.first * scala1 + 10,
-                        victim_center.second * scala1 + 10));
+                Segment(victim_center.first * scale, victim_center.second * scale, victim_center.first * scale + 10,
+                        victim_center.second * scale + 10));
         segments.push_back(
-                Segment(victim_center.first * scala1, victim_center.second * scala1, victim_center.first * scala1 - 10,
-                        victim_center.second * scala1 - 10));
+                Segment(victim_center.first * scale, victim_center.second * scale, victim_center.first * scale - 10,
+                        victim_center.second * scale - 10));
         segments.push_back(
-                Segment(victim_center.first * scala1, victim_center.second * scala1, victim_center.first * scala1 - 10,
-                        victim_center.second * scala1 + 10));
+                Segment(victim_center.first * scale, victim_center.second * scale, victim_center.first * scale - 10,
+                        victim_center.second * scale + 10));
     }
 
 
     for (int i = 0; i < borders.size(); i++) {
         //cv::line(image, cv::Point(borders[i].x, borders[i].y), cv::Point(5, 0), cv::Scalar(255, 255, 255), 2, 1);
         if (i <= borders.size() - 2) {
-            segments.push_back(Segment(borders[i].x * scala1, borders[i].y * scala1, borders[i + 1].x * scala1,
-                                       borders[i + 1].y * scala1));
+            segments.push_back(Segment(borders[i].x * scale, borders[i].y * scale, borders[i + 1].x * scale,
+                                       borders[i + 1].y * scale));
         } else {
-            segments.push_back(Segment(borders[i].x * scala1, borders[i].y * scala1, borders[0].x * scala1,
-                                       borders[0].y * scala1));
+            segments.push_back(Segment(borders[i].x * scale, borders[i].y * scale, borders[0].x * scale,
+                                       borders[0].y * scale));
         }
     }
 
@@ -284,10 +277,10 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
         for (int j = 0; j < obstacle_list[i].size(); j++) {
             if (j <= v.size() - 2) {
                 //cv::line( image, cv::Point(v[j].x*500, v[j].y*500), cv::Point(v[(j+1)].x*500, v[(j+1)].y*500), cv::Scalar( 255, 255, 255 ),  2, 1 );
-                segments.push_back(Segment(v[j].x * scala1, v[j].y * scala1, v[j + 1].x * scala1, v[j + 1].y * scala1));
+                segments.push_back(Segment(v[j].x * scale, v[j].y * scale, v[j + 1].x * scale, v[j + 1].y * scale));
             } else {
                 //cv::line( image, cv::Point(v[j].x*500, v[j].y*500), cv::Point(v[0].x*500, v[0].y*500), cv::Scalar( 255, 255, 255 ),  2, 1 );
-                segments.push_back(Segment(v[j].x * scala1, v[j].y * scala1, v[0].x * scala1, v[0].y * scala1));
+                segments.push_back(Segment(v[j].x * scale, v[j].y * scale, v[0].x * scale, v[0].y * scale));
             }
         }
     }
@@ -330,17 +323,17 @@ void Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &bor
 
     for (int i = 0; i < victim_list.size(); i++) {
         std::pair<double, double> victim_center = calcCentroid(victim_list[i].second);
-        cv::line(image, cv::Point(victim_center.first * scala1, victim_center.second * scala1),
-                 cv::Point(victim_center.first * scala1 + 10, victim_center.second * scala1 - 10),
+        cv::line(image, cv::Point(victim_center.first * scale, victim_center.second * scale),
+                 cv::Point(victim_center.first * scale + 10, victim_center.second * scale - 10),
                  cv::Scalar(107, 255, 0), 2, 1);
-        cv::line(image, cv::Point(victim_center.first * scala1, victim_center.second * scala1),
-                 cv::Point(victim_center.first * scala1 + 10, victim_center.second * scala1 + 10),
+        cv::line(image, cv::Point(victim_center.first * scale, victim_center.second * scale),
+                 cv::Point(victim_center.first * scale + 10, victim_center.second * scale + 10),
                  cv::Scalar(107, 255, 0), 2, 1);
-        cv::line(image, cv::Point(victim_center.first * scala1, victim_center.second * scala1),
-                 cv::Point(victim_center.first * scala1 - 10, victim_center.second * scala1 - 10),
+        cv::line(image, cv::Point(victim_center.first * scale, victim_center.second * scale),
+                 cv::Point(victim_center.first * scale - 10, victim_center.second * scale - 10),
                  cv::Scalar(107, 255, 0), 2, 1);
-        cv::line(image, cv::Point(victim_center.first * scala1, victim_center.second * scala1),
-                 cv::Point(victim_center.first * scala1 - 10, victim_center.second * scala1 + 10),
+        cv::line(image, cv::Point(victim_center.first * scale, victim_center.second * scale),
+                 cv::Point(victim_center.first * scale - 10, victim_center.second * scale + 10),
                  cv::Scalar(107, 255, 0), 2, 1);
 
     }
@@ -421,11 +414,16 @@ void Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &bor
 
     cv::imshow("Voronoi", image);
     cv::waitKey(0);
-
 }
 
 using namespace boost;
-const double threshold_ricerca = 0.01;
+
+/**
+ * Return the vertex position given a point (coordinates) element
+ * @param v Array of vertex index
+ * @param el element to find
+ * @return position index
+ */
 
 int get_pos_array(std::vector<Voronoi::Point> v, Voronoi::Point el) {
     for (int i = 0; i < v.size(); i++) {
@@ -435,42 +433,31 @@ int get_pos_array(std::vector<Voronoi::Point> v, Voronoi::Point el) {
     return -1;
 }
 
-typedef adjacency_list<listS, vecS, undirectedS,
-        no_property, property<edge_weight_t, double> > graph_t;
-typedef graph_traits<graph_t>::vertex_descriptor vertex_descriptor;
-typedef graph_traits<graph_t>::edge_descriptor edge_descriptor;
-typedef std::pair<int, int> Edge;
-
-struct has_weight_greater_than {
-    has_weight_greater_than(int w_, graph_t &g_) : w(w_), g(g_) {}
-
-    bool operator()(graph_traits<graph_t>::edge_descriptor e) {
-#if defined(BOOST_MSVC) && BOOST_MSVC <= 1300
-        property_map<graph_t, edge_weight_t>::type weight = get(edge_weight, g);
-    return get(weight, e) > w;
-#else
-        // This version of get() breaks VC++
-        return get(edge_weight, g, e) > w;
-#endif
-    }
-
-    int w;
-    graph_t &g;
-};
-
-void clean_path(std::vector<Voronoi::Point> vertex, std::vector<int> &path) {
+/**
+ * Prune the minimum path deleting the node to close to each other
+ * @param vertex array of all vertex
+ * @param path Minimum path
+ */
+void clean_path(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int, bool> > &path) {
+    std::cout << "Elimino: ";
     for (int i = path.size() - 1; i > 0; i--) {
         //Prune dell'albero
         double dist = sqrt(
-                pow(vertex[path[i]].a - vertex[path[i - 1]].a, 2) + pow(vertex[path[i]].b - vertex[path[i - 1]].b, 2));
-        if (dist < 0.1) {
-            std::cout << "Elimino: " << path[i - 1] << std::endl;
-            path.erase(path.begin() + (i - 1));
-
+                pow(vertex[path[i].first].a - vertex[path[i - 1].first].a, 2) +
+                pow(vertex[path[i].first].b - vertex[path[i - 1].first].b, 2));
+        if (dist < threshold_dist) {
+            if (!path[i - 1].second) {
+                std::cout << path[i - 1].first << ",";
+                path.erase(path.begin() + (i - 1));
+            }
         }
     }
+    std::cout << std::endl;
 }
 
+/**
+ * Get the approach angle of a point
+ */
 double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point third) {
     double a1 = atan2((second.b - first.b), (second.a - first.a));
     double a2 = atan2((third.b - second.b), (third.a - second.a));
@@ -481,181 +468,52 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
         a = 2 * M_PI + a;
     }
 
-    std::cout << "A1: " << a1 << " ; A2:" << a2 << " ; Angolo di approccio: " << a << std::endl;
-    std::cout << std::endl;
+    /*std::cout << "A1: " << a1 << " ; A2:" << a2 << " ; Angolo di approccio: " << a << std::endl;
+    std::cout << std::endl;*/
 
     return a;
 }
 
+/**
+ * Boolean function to find the pairs of segments with enough angle to be considered
+ * @param first Point
+ * @param second Point
+ * @param third Point
+ * @return true if the two segment as a difference angle higher than a thresh
+ */
 bool coeff_higher(Voronoi::Point first, Voronoi::Point second, Voronoi::Point third) {
     double m1 = atan((second.b - first.b) / (second.a - first.a));
     double m2 = atan((third.b - second.b) / (third.a - second.a));
 
     double diff = fabs(m2 - m1);
 
-    std::cout << "P1: " << first.a << "," << first.b << std::endl;
+    /*std::cout << "P1: " << first.a << "," << first.b << std::endl;
     std::cout << "P2: " << second.a << "," << second.b << std::endl;
     std::cout << "P3: " << third.a << "," << third.b << std::endl;
-    std::cout << "M1: " << m1 << " ; M2:" << m2 << " ; Diff: " << diff << std::endl;
+    std::cout << "M1: " << m1 << " ; M2:" << m2 << " ; Diff: " << diff << std::endl;*/
 
-    return diff > 0.15;
+    return diff > threshold_angle;
 }
 
-std::vector<int> get_shortest_path(int from, int to)
-{
-
-}
-
-std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd, Voronoi::Point &robot_center,
-                                                                     std::vector<std::pair<int, Voronoi::Point>> &victims_center, Voronoi::Point &gate_center) {
-    std::vector<Edge> edge_array;
-    std::vector<double> weights;
-    std::vector<Voronoi::Point> vertex_map;
-
-    int vertex_id = 0;
-
-    for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
-        double x = it->x() / scala2;
-        double y = it->y() / scala2;
-
-        vertex_map.emplace_back(Voronoi::Point(x, y));
-
-        vertex_id++;
-    }
-
-    for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin(); it != vd.edges().end(); ++it) {
-        if ((it->vertex0() != NULL) &&
-            (it->vertex1() != NULL)) {  //NOTE: se la retta va all'infinito allora vertex = NULL!!!
-
-            if (it->is_primary()) {
-                Voronoi::Point p1 = Voronoi::Point(it->vertex0()->x() / scala2, it->vertex0()->y() / scala2);
-                Voronoi::Point p2 = Voronoi::Point(it->vertex1()->x() / scala2, it->vertex1()->y() / scala2);
-
-                int pos_1 = get_pos_array(vertex_map, p1);
-                int pos_2 = get_pos_array(vertex_map, p2);
-
-                if (pos_1 != -1 && pos_2 != -1) {
-                    double distance = sqrt(pow(p1.a - p2.a, 2) + pow(p1.b - p2.b, 2));
-
-                    weights.emplace_back(distance * 1000.0);
-                    edge_array.emplace_back(Edge(pos_1, pos_2));
-                }
-            }
-        }
-    }
-
-    //Ottengo vertici posizioni chiave
-
-    int robot_pos = get_pos_array(vertex_map, robot_center);
-    int gate_pos =  get_pos_array(vertex_map, gate_center);
-
-    std::vector<int> victim_pos;
-
-    for(int i = 0; i < victims_center.size(); i++){
-        victim_pos.emplace_back(get_pos_array(vertex_map, victims_center[i].second));
-    }
-
-    int num_nodes = vertex_map.size();
-    std::cout << "Numero: " << num_nodes << std::endl;
-
-    double arr[weights.size()];
-    std::copy(weights.begin(), weights.end(), arr);
-
-    Edge array_edge[edge_array.size()];
-    std::copy(edge_array.begin(), edge_array.end(), array_edge);
-
-    int num_arcs = sizeof(array_edge) / sizeof(Edge);
-
-    graph_t g(array_edge, array_edge + num_arcs, arr, num_nodes);
-    property_map<graph_t, edge_weight_t>::type weightmap = get(edge_weight, g);
-
-    std::vector<vertex_descriptor> p(num_vertices(g));
-    std::vector<double> d(num_vertices(g));
-    vertex_descriptor s = vertex(robot_pos, g);
-
-    property_map<graph_t, vertex_index_t>::type indexmap = get(vertex_index, g);
-
-    //remove_edge_if(has_weight_greater_than(10000, g), g);
-
-    dijkstra_shortest_paths(g, s, &p[0], &d[0], weightmap, indexmap,
-                            std::less<double>(), closed_plus<double>(),
-                            10000, 0,
-                            default_dijkstra_visitor());
-
-    
-
-    std::cout << "distances and parents:" << std::endl;
-    graph_traits<graph_t>::vertex_iterator vi, vend;
-    for (tie(vi, vend) = vertices(g); vi != vend; ++vi) {
-        std::cout << "distance(" << *vi << ") = " << d[*vi] << ", ";
-        std::cout << "parent(" << *vi << ") = " << p[*vi] << std::endl;
-    }
-    std::cout << std::endl;
-
-    std::vector<std::tuple<int, Voronoi::Point, double> > shortest_path;
-
-    int from = gate_pos;
-    std::vector<int> path;
-
-    for(int i = 0; i <victim_pos.size() ; i++){
-        std::cout << "Vittina n: " << victim_pos[i] << std::endl;
-        while (from != victim_pos[i]) {
-            path.push_back(from);
-            from = p[from]; // you're one step closer to the source..
-        }
-
-        path.push_back(victim_pos[i]);
-    }
-
-    while (from != robot_pos) {
-        path.push_back(from);
-        from = p[from]; // you're one step closer to the source..
-    }
-
-    path.push_back(robot_pos);
-
-    std::cout << "Cammino minimo: ";
-    for (int i = 0; i < path.size(); i++) {
-        std::cout << path[i] << "(" << vertex_map[path[i]].a << "," << vertex_map[path[i]].b << ")";
-        if (i < path.size() - 1) std::cout << " --> ";
-    }
-
-    std::cout << std::endl;
-
-    clean_path(vertex_map, path);
-
+/**
+ * Print the minimum path
+ */
+void print_path(std::vector<Voronoi::Point> vertex, std::vector<int> &path) {
     std::cout << "Cammino minimo dopo pruning: ";
     for (int i = 0; i < path.size(); i++) {
-        std::cout << path[i] << "(" << vertex_map[path[i]].a << "," << vertex_map[path[i]].b << ")";
+        std::cout << path[i] << "(" << vertex[path[i]].a << "," << vertex[path[i]].b << ")";
         if (i < path.size() - 1) std::cout << " --> ";
     }
 
     std::cout << std::endl;
+}
 
-    for (int i = path.size() - 1; i >= 0; i--) {
-        //Prune dell'albero
-        if (i == 0) {
-            shortest_path.emplace_back(std::make_tuple(path[i], Voronoi::Point(vertex_map[path[i]].a * scala2,
-                                                                               vertex_map[path[i]].b * scala2),
-                                                       M_PI / 2));
-        } else if (i == path.size() - 1) {
-            shortest_path.emplace_back(std::make_tuple(path[i], Voronoi::Point(vertex_map[path[i]].a * scala2,
-                                                                               vertex_map[path[i]].b * scala2), 0));
-        } else if (i < path.size() - 1 && i != 0) {
-            std::cout << "Archi: " << path[i + 1] << " ->" << path[i] << "->" << path[i - 1] << std::endl;
-
-            if (coeff_higher(vertex_map[path[i + 1]], vertex_map[path[i]], vertex_map[path[i - 1]])) {
-                double angle = get_angle(vertex_map[path[i + 1]], vertex_map[path[i]], vertex_map[path[i - 1]]);
-
-                shortest_path.emplace_back(std::make_tuple(path[i], Voronoi::Point(vertex_map[path[i]].a * scala2,
-                                                                                   vertex_map[path[i]].b * scala2),
-                                                           angle));
-            }
-        }
-    }
-
-    std::cout << "Numero nodi: " << shortest_path.size() << std::endl;
-
+/**
+ * Procedure to save the dot file for the graph
+ * @param myg Graph strcture
+ * @param path Minimum path
+ */
+void print_dot(Voronoi::Graph myg, std::vector<int> &path) {
     std::ofstream dot_file("/tmp/dijkstra-eg.dot");
 
     dot_file << "digraph D {\n"
@@ -664,18 +522,18 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
              << "  ratio=\"fill\"\n"
              << "  edge[style=\"bold\", fontsize=26]\n" << "  node[shape=\"circle\", fontsize=28]\n";
 
-    for (int i = 0; i < num_nodes; i++) {
+    for (int i = 0; i < myg.getVertexSize(); i++) {
         dot_file << i
-                 << "[pos=\"" << vertex_map[i].a << "," << vertex_map[i].b << "!\"]\n";
+                 << "[pos=\"" << myg.vertex_map[i].a << "," << myg.vertex_map[i].b << "!\"]\n";
     }
 
     graph_traits<graph_t>::edge_iterator ei, ei_end;
-    for (tie(ei, ei_end) = edges(g); ei != ei_end; ++ei) {
+    for (tie(ei, ei_end) = edges(myg.g); ei != ei_end; ++ei) {
         graph_traits<graph_t>::edge_descriptor e = *ei;
         graph_traits<graph_t>::vertex_descriptor
-                u = source(e, g), v = target(e, g);
+                u = source(e, myg.g), v = target(e, myg.g);
         dot_file << u << " -> " << v
-                 << "[label=\"" << get(weightmap, e) << "\"";
+                 << "[label=\"" << get(myg.weightmap, e) << "\"";
 
 
         bool shortest = false;
@@ -693,12 +551,130 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         dot_file << "]";
     }
     dot_file << "}";
-
-    //cv::imshow("Voronoi", image);
-    //cv::waitKey(0);
-
-    return shortest_path;
 }
 
+/**
+ * Comparator for victim number
+ */
+bool compare_victim_number(std::pair<int, Voronoi::Point> v1, std::pair<int, Voronoi::Point> v2) {
+    return (v1.first > v2.first);
+}
+
+/**
+ * Generate graph from voronoi points and calculate the minimum path from robot to gate through the victims
+ * @param vd Voronoi diagram
+ * @return Minimum point path including approach angle
+ */
+std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd) {
+    //Graph struct
+    Graph myg;
+
+    // Fill vertex array
+    int vertex_id = 0;
+    for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
+        double x = it->x() / scale;
+        double y = it->y() / scale;
+
+        myg.vertex_map.emplace_back(Voronoi::Point(x, y));
+
+        vertex_id++;
+    }
+
+    // Fill the edge array based on previous vertex
+    for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin(); it != vd.edges().end(); ++it) {
+        if ((it->vertex0() != NULL) &&
+            (it->vertex1() != NULL)) {  //NOTE: se la retta va all'infinito allora vertex = NULL!!!
+
+            if (it->is_primary()) {
+                Voronoi::Point p1 = Voronoi::Point(it->vertex0()->x() / scale, it->vertex0()->y() / scale);
+                Voronoi::Point p2 = Voronoi::Point(it->vertex1()->x() / scale, it->vertex1()->y() / scale);
+
+                int pos_1 = get_pos_array(myg.vertex_map, p1);
+                int pos_2 = get_pos_array(myg.vertex_map, p2);
+
+                if (pos_1 != -1 && pos_2 != -1) {
+                    //Compute the euclidean distance that is used as a weight
+                    double distance = sqrt(pow(p1.a - p2.a, 2) + pow(p1.b - p2.b, 2));
+
+                    myg.weights.emplace_back(distance * 1000.0);
+                    myg.edge.emplace_back(Edge(pos_1, pos_2));
+                }
+            }
+        }
+    }
+
+    // Get key position based on vertex pos
+    int robot_pos = get_pos_array(myg.vertex_map, this->robot_center);
+    int gate_pos = get_pos_array(myg.vertex_map, this->gate_center);
+
+    std::vector<int> victim_pos;
+
+    // Sort the victim based on number recognition
+    sort(this->victims_center.begin(), this->victims_center.end(), compare_victim_number);
+
+    // Get index of victims vertex
+    for (int i = 0; i < this->victims_center.size(); i++)
+        victim_pos.emplace_back(get_pos_array(myg.vertex_map, this->victims_center[i].second));
 
 
+    // Compute Graph
+    int num_nodes = myg.getVertexSize();
+    myg.createGraph();
+
+    // Compute minimum path in piece through djjkstra reverse flow
+    std::vector<std::pair<int, bool> > path;
+    int pos = gate_pos;
+
+    for (int i = 0; i < victim_pos.size(); i++) {
+        path = myg.add_piece_path(victim_pos[i], pos);
+        pos = victim_pos[i];
+    }
+
+    // Last hope to the robot_pos
+    path = myg.add_piece_path(robot_pos, pos);
+
+    // Clean the noise and useless point in the graph based on euclidean distance
+    clean_path(myg.vertex_map, path);
+    //print_path(myg.vertex_map, path);
+
+    // Return shortest path structure
+    std::vector<std::tuple<int, Voronoi::Point, double> > shortest_path;
+
+    // Loop on path points (Reverse order)
+    for (int i = path.size() - 1; i >= 0; i--) {
+        if (i == 0) { // Add the gate pos
+            shortest_path.emplace_back(
+                    std::make_tuple(path[i].first, Voronoi::Point(myg.vertex_map[path[i].first].a * scale,
+                                                                  myg.vertex_map[path[i].first].b * scale), M_PI / 2));
+        } else if (i == path.size() - 1) { // Add the robot pos
+            shortest_path.emplace_back(
+                    std::make_tuple(path[i].first, Voronoi::Point(myg.vertex_map[path[i].first].a * scale,
+                                                                  myg.vertex_map[path[i].first].b * scale), 0));
+        } else if (i < path.size() - 1 && i != 0) { // For every other point
+            //std::cout << "Archi: " << path[i + 1].first << " ->" << path[i].first << "->" << path[i - 1].first << std::endl;
+
+            // Calculate the angle difference between the two segment
+            double angle = get_angle(myg.vertex_map[path[i + 1].first], myg.vertex_map[path[i].first],
+                                     myg.vertex_map[path[i - 1].first]);
+
+            if (path[i].second) { // If it's a key point, add it without any doubt
+                shortest_path.emplace_back(
+                        std::make_tuple(path[i].first, Voronoi::Point(myg.vertex_map[path[i].first].a * scale,
+                                                                      myg.vertex_map[path[i].first].b * scale), angle));
+
+            } else if (coeff_higher(myg.vertex_map[path[i + 1].first],
+                                    myg.vertex_map[path[i].first],
+                                    myg.vertex_map[path[i - 1].first])) { // Otherwise if the angle reach a thresh
+
+                shortest_path.emplace_back(
+                        std::make_tuple(path[i].first, Voronoi::Point(myg.vertex_map[path[i].first].a * scale,
+                                                                      myg.vertex_map[path[i].first].b * scale), angle));
+            }
+
+            // If two segment is close to a line there is no sense in considering it
+        }
+    }
+
+    //print_dot(myg, path);
+    return shortest_path;
+}
