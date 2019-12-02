@@ -459,10 +459,18 @@ void clean_path(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int, b
  * Get the approach angle of a point
  */
 double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point third) {
+    double d1 = sqrt(
+            pow(second.a - first.a, 2) +
+            pow(second.b - first.b, 2));
+
+    double d2 = sqrt(
+            pow(third.a - second.a, 2) +
+            pow(third.b - second.b, 2));
+
     double a1 = atan2((second.b - first.b), (second.a - first.a));
     double a2 = atan2((third.b - second.b), (third.a - second.a));
 
-    double a = a1 + (a2 - a1) / 2;
+    double a = a1 + (a2 - a1)/2;
 
     if (a < 0) {
         a = 2 * M_PI + a;
@@ -482,15 +490,15 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
  * @return true if the two segment as a difference angle higher than a thresh
  */
 bool coeff_higher(Voronoi::Point first, Voronoi::Point second, Voronoi::Point third) {
-    double m1 = atan((second.b - first.b) / (second.a - first.a));
-    double m2 = atan((third.b - second.b) / (third.a - second.a));
+    double m1 = atan2((second.b - first.b), (second.a - first.a));
+    double m2 = atan2((third.b - second.b), (third.a - second.a));
 
     double diff = fabs(m2 - m1);
 
-    /*std::cout << "P1: " << first.a << "," << first.b << std::endl;
+    std::cout << "P1: " << first.a << "," << first.b << std::endl;
     std::cout << "P2: " << second.a << "," << second.b << std::endl;
     std::cout << "P3: " << third.a << "," << third.b << std::endl;
-    std::cout << "M1: " << m1 << " ; M2:" << m2 << " ; Diff: " << diff << std::endl;*/
+    std::cout << "M1: " << m1 << " ; M2:" << m2 << " ; Diff: " << diff << std::endl;
 
     return diff > threshold_angle;
 }
@@ -513,7 +521,7 @@ void print_path(std::vector<Voronoi::Point> vertex, std::vector<int> &path) {
  * @param myg Graph strcture
  * @param path Minimum path
  */
-void print_dot(Voronoi::Graph myg, std::vector<int> &path) {
+void print_dot(Voronoi::Graph myg, std::vector<std::pair<int, bool> > &path) {
     std::ofstream dot_file("/tmp/dijkstra-eg.dot");
 
     dot_file << "digraph D {\n"
@@ -539,7 +547,7 @@ void print_dot(Voronoi::Graph myg, std::vector<int> &path) {
         bool shortest = false;
 
         for (int i = path.size() - 1; i > 0; i--) {
-            if (u == path[i] && v == path[i - 1]) {
+            if (u == path[i].first && v == path[i - 1].first) {
                 shortest = true;
             }
         }
@@ -651,7 +659,7 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
                     std::make_tuple(path[i].first, Voronoi::Point(myg.vertex_map[path[i].first].a * scale,
                                                                   myg.vertex_map[path[i].first].b * scale), 0));
         } else if (i < path.size() - 1 && i != 0) { // For every other point
-            //std::cout << "Archi: " << path[i + 1].first << " ->" << path[i].first << "->" << path[i - 1].first << std::endl;
+            std::cout << "Archi: " << path[i + 1].first << " ->" << path[i].first << "->" << path[i - 1].first << std::endl;
 
             // Calculate the angle difference between the two segment
             double angle = get_angle(myg.vertex_map[path[i + 1].first], myg.vertex_map[path[i].first],
@@ -675,6 +683,6 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         }
     }
 
-    //print_dot(myg, path);
+    print_dot(myg, path);
     return shortest_path;
 }
