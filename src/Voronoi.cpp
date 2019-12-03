@@ -496,13 +496,24 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
 
     double a = meta;
 
-    if(d1 > d2){
-        double per = 1- d2/d1;
-        a = meta + meta * per;
-    }else if (d2 > d1){
-        double per = d1/d2;
-        a = meta * per;
+    if(a1 < a2){
+        if(d1 > d2){
+            double per = d2/d1;
+            a = meta * per;
+        }else if (d2 > d1){
+            double per = 1- d1/d2;
+            a = meta + fabs(a2-a1) * per;
+        }
+    }else{
+        if(d1 > d2){
+            double per = 1- d2/d1;
+            a = meta + fabs(a2-a1) * per;
+        }else if (d2 > d1){
+            double per = d1/d2;
+            a = meta * per;
+        }
     }
+
 
     std::cout << "L1: " << d1 << " ; L2:" << d2 << std::endl;
     std::cout << "A1: " << a1 << " ; A2:" << a2  << " ; Diff:"  << a2-a1 << " ; Angolo metà:"  << meta << "; Angolo di approccio: " << a << std::endl;
