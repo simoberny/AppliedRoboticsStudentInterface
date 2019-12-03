@@ -319,7 +319,7 @@ namespace student {
         v.calculate(merged_list, borders, victim_list, gate, x, y, theta, vd);
 
         //Generate the graph
-        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd);
+        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list);
 
         //Draw all the scene
         cv::Mat image = v.draw(merged_list, borders, victim_list, gate, x, y, theta, vd, t);

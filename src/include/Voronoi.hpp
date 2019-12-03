@@ -140,7 +140,7 @@ public:
               const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd,
               const std::vector<std::tuple<int, Voronoi::Point, double> > te);
 
-    std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double> &vd);
+    std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles);
 };
 
 

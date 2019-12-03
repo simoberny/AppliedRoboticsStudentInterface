@@ -15,7 +15,7 @@ namespace student {
                          cv::CHAIN_APPROX_SIMPLE);
         cv::drawContours(img_in, contours, -1, cv::Scalar(40, 190, 40), 4, cv::LINE_AA);
 
-        cv::imwrite(config_folder + "/img_robot.jpg", img_in);
+        //cv::imwrite(config_folder + "/img_robot.jpg", img_in);
 
         //cv::imshow("robot_mask", img_in);
         //cv::waitKey(20);
@@ -30,7 +30,7 @@ namespace student {
 
             // Check the number of edge of the aproximate contour
             if (approx_curve.size() == 3) {
-                std::cout << "triangle (robot) found!:  " << contours[i].size() << std::endl;
+                //std::cout << "triangle (robot) found!:  " << contours[i].size() << std::endl;
                 break;
             }
         }
@@ -79,12 +79,12 @@ namespace student {
             vec_approx_curve = {approx_curve};
             cv::drawContours(img_in, vec_approx_curve, -1, cv::Scalar(0, 0, 255), 3, cv::LINE_AA);
             //calcolo la posizione del robot (rotazione e posizione del vertice del triangolo)
-
+/*
             std::cout << "-----triangle position (in meter?):  " << std::endl;
             std::cout << " x " << triangle[0].x << " y " << triangle[0].y << std::endl;
             std::cout << " x " << triangle[1].x << " y " << triangle[1].y << std::endl;
             std::cout << " x " << triangle[2].x << " y " << triangle[2].y << std::endl;
-
+*/
 
             return true;
 

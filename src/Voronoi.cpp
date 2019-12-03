@@ -292,6 +292,21 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
 
     construct_voronoi(points.begin(), points.end(), segments.begin(), segments.end(), &vd);
 
+
+
+}
+
+bool voronoi_match_obstacles(std::vector<Polygon> merged_obstacles,double x,double y){
+    for (int i = 0; i < merged_obstacles.size(); i++) {
+        Polygon v = merged_obstacles[i];
+        for (int j = 0; j < v.size(); j++) {
+            if ((fabs(x - v[j].x) < threshold_ricerca) && (fabs(y - v[j].y) < threshold_ricerca)){
+                //std::cout<<"elimon un vertie:  x: "<<x<<" y: "<<y<<" vicino al obstacle: x: "<<v[j].x<<"v[j].y "<<v[j].y<<std::endl;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
@@ -363,6 +378,7 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
             if (j <= v.size() - 2) {
                 cv::line(image, cv::Point(v[j].x * scale, v[j].y * scale),
                          cv::Point(v[(j + 1)].x * scale, v[(j + 1)].y * scale), cv::Scalar(255, 255, 255), 2, 1);
+
             } else {
                 cv::line(image, cv::Point(v[j].x * scale, v[j].y * scale), cv::Point(v[0].x * scale, v[0].y * scale),
                          cv::Scalar(255, 255, 255), 2, 1);
@@ -379,8 +395,16 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
 
             if (it->is_primary()) {
                 //std::cout << "edge: x1: " << it->vertex0()->x() << " y1: " << it->vertex0()->y() << " \t  x2 " << it->vertex1()->x() << " y2: " << it->vertex1()->y() << std::endl;
-                cv::line(image, cv::Point(it->vertex0()->x(), it->vertex0()->y()),
-                         cv::Point(it->vertex1()->x(), it->vertex1()->y()), cv::Scalar(110, 220, 0), 1, 8);
+                double x = it->vertex0()->x() / scale;
+                double y = it->vertex0()->y() / scale;
+                double x1 = it->vertex1()->x() / scale;
+                double y1 = it->vertex1()->y() / scale;
+                if(!voronoi_match_obstacles(obstacle_list,x,y)&&!voronoi_match_obstacles(obstacle_list,x1,y1)) {
+                    cv::line(image, cv::Point(it->vertex0()->x(), it->vertex0()->y()),
+                            cv::Point(it->vertex1()->x(), it->vertex1()->y()), cv::Scalar(110, 220, 0), 1, 8);
+
+
+                }
 
             }
         }
@@ -388,7 +412,14 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
 
     for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
         //std::cout << "vertex: x1: " << it->x() << " \t y1: " << it->y() << std::endl;
-        cv::circle(image, cv::Point(it->x(), it->y()), 1, cv::Scalar(0, 0, 255), 2, 8, 0);
+        double x = it->x() / scale;
+        double y = it->y() / scale;
+        if(!voronoi_match_obstacles(obstacle_list,x,y)) {
+            cv::circle(image, cv::Point(it->x(), it->y()), 1, cv::Scalar(0, 0, 255), 2, 8, 0);
+
+
+        }
+
     }
 
 /*
@@ -609,12 +640,14 @@ bool compare_victim_number(std::pair<int, Voronoi::Point> v1, std::pair<int, Vor
     return (v1.first > v2.first);
 }
 
+
+
 /**
  * Generate graph from voronoi points and calculate the minimum path from robot to gate through the victims
  * @param vd Voronoi diagram
  * @return Minimum point path including approach angle
  */
-std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd) {
+std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles) {
     //Graph struct
     Graph myg;
 
@@ -623,8 +656,9 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
     for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
         double x = it->x() / scale;
         double y = it->y() / scale;
-
-        myg.vertex_map.emplace_back(Voronoi::Point(x, y));
+        if(!voronoi_match_obstacles(merged_obstacles,x,y)) {
+            myg.vertex_map.emplace_back(Voronoi::Point(x, y));
+        }
 
         vertex_id++;
     }
