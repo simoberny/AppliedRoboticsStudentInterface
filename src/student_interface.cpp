@@ -284,7 +284,7 @@ namespace student {
                     std::vector<std::pair<int, Polygon>> &victim_list, Polygon &gate,
                     const std::string &config_folder) {
         //Robot radius
-        int robot_r = 65;
+        int robot_r = 85;
 
         std::cout << "enter in process map" << std::endl;
         const bool res1 = processObstacles(img_in, scale, obstacle_list, robot_r);
@@ -294,9 +294,10 @@ namespace student {
         const bool res3 = processVictims(img_in, scale, victim_list, config_folder);
         if (!res3) std::cout << "processVictims return false" << std::endl;
 
+        cv::imwrite(config_folder + "/img_obstacle_recognition.jpg", img_in);
 
-        cv::imshow("Original", img_in);
-        cv::waitKey(1000);
+        //cv::imshow("Original", img_in);
+        //cv::waitKey(1000);
 
         return res1 && res2 && res3;
     }
@@ -321,7 +322,8 @@ namespace student {
         std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd);
 
         //Draw all the scene
-        //v.draw(merged_list, borders, victim_list, gate, x, y, theta, vd, t);
+        cv::Mat image = v.draw(merged_list, borders, victim_list, gate, x, y, theta, vd, t);
+        cv::imwrite(config_folder + "/img_voronoi.jpg", image);
 
         static double scale = 500.0;
 
@@ -351,7 +353,7 @@ namespace student {
 
             //Get the dubins curve
             Dubins dub;
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 20.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 12.0);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;

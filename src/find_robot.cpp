@@ -15,8 +15,10 @@ namespace student {
                          cv::CHAIN_APPROX_SIMPLE);
         cv::drawContours(img_in, contours, -1, cv::Scalar(40, 190, 40), 4, cv::LINE_AA);
 
-        cv::imshow("robot_mask", img_in);
-        cv::waitKey(20);
+        cv::imwrite(config_folder + "/img_robot.jpg", img_in);
+
+        //cv::imshow("robot_mask", img_in);
+        //cv::waitKey(20);
 
         std::vector<cv::Point> approx_curve;
 

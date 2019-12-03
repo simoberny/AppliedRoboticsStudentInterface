@@ -39,7 +39,7 @@ typedef std::pair<int, int> Edge;
 
 const double threshold_ricerca = 0.01;
 const double threshold_angle = 0.4;
-const double threshold_dist = 0.1;
+const double threshold_dist = 0.12;
 
 static double scale = 500.0;
 
@@ -114,7 +114,12 @@ public:
             int to = p2;
 
             while (to != p1) {
-                this->shortest_path.push_back(std::make_pair(to, false));
+                if(!this->shortest_path.size()){
+                    this->shortest_path.push_back(std::make_pair(to, true));
+                }else{
+                    this->shortest_path.push_back(std::make_pair(to, false));
+                }
+
                 to = p[to]; // you're one step closer to the source..
             }
 
@@ -130,7 +135,7 @@ public:
                    const std::vector<std::pair<int, Polygon>> &victim_list,
                    const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd);
 
-    void draw(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
+    cv::Mat draw(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
               const std::vector<std::pair<int, Polygon>> &victim_list,
               const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd,
               const std::vector<std::tuple<int, Voronoi::Point, double> > te);
