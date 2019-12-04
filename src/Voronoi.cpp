@@ -75,7 +75,6 @@ double distance_line_point(double l1_x1, double l1_y1, double l1_x2, double l1_y
     std::cout
             << "Line-point: " << boost::geometry::distance(line1, p1) << std::endl;
     return boost::geometry::distance(line1, p1);
-
 }
 
 double
@@ -94,7 +93,6 @@ distance_line_line(double l1_x1, double l1_y1, double l1_x2, double l1_y2, doubl
     std::cout
             << "Line-line: " << boost::geometry::distance(line1, line2) << std::endl;
     return boost::geometry::distance(line1, line2);
-
 }
 
 void
@@ -205,7 +203,6 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
     }
 }
 
-
 void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
                         const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
                         const float y, const float theta, voronoi_diagram<double> &vd) {
@@ -237,8 +234,6 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
     this->gate_center.a = triangle_gate[0][0];
     this->gate_center.b = triangle_gate[0][1];
 
-
-
     // croce sulle vittime per forzare il diagramma di voronoi a passare sopra
     for (int i = 0; i < victim_list.size(); i++) {
         std::pair<double, double> victim_center = calcCentroid(victim_list[i].second);
@@ -269,7 +264,6 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
                                        borders[0].y * scale));
         }
     }
-
 
     for (int i = 0; i < obstacle_list.size(); i++) {
         Polygon v = obstacle_list[i];
@@ -350,9 +344,7 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
         cv::line(image, cv::Point(victim_center.first * scale, victim_center.second * scale),
                  cv::Point(victim_center.first * scale - 10, victim_center.second * scale + 10),
                  cv::Scalar(107, 255, 0), 2, 1);
-
     }
-
 
     for (int i = 0; i < matrix_size; i++) {
         cv::line(image, cv::Point(test_vector[i][0], test_vector[i][1]),
@@ -369,7 +361,6 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
         }
     }
 
-
     for (int i = 0; i < obstacle_list.size(); i++) {
         Polygon v = obstacle_list[i];
 
@@ -382,12 +373,9 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
             } else {
                 cv::line(image, cv::Point(v[j].x * scale, v[j].y * scale), cv::Point(v[0].x * scale, v[0].y * scale),
                          cv::Scalar(255, 255, 255), 2, 1);
-
             }
         }
-
     }
-
 
     for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin(); it != vd.edges().end(); ++it) {
         if ((it->vertex0() != NULL) &&
@@ -402,8 +390,6 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
                 if(!voronoi_match_obstacles(obstacle_list,x,y)&&!voronoi_match_obstacles(obstacle_list,x1,y1)) {
                     cv::line(image, cv::Point(it->vertex0()->x(), it->vertex0()->y()),
                             cv::Point(it->vertex1()->x(), it->vertex1()->y()), cv::Scalar(110, 220, 0), 1, 8);
-
-
                 }
 
             }
@@ -416,18 +402,8 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
         double y = it->y() / scale;
         if(!voronoi_match_obstacles(obstacle_list,x,y)) {
             cv::circle(image, cv::Point(it->x(), it->y()), 1, cv::Scalar(0, 0, 255), 2, 8, 0);
-
-
         }
-
     }
-
-/*
-    for (voronoi_diagram<double>::const_cell_iterator it = vd.cells().begin(); it != vd.cells().end(); ++it) {
-        std::cout << "vertex: x1: " << it->incident_edge()-> << " \t y1: " << it->y() << std::endl;
-        cv::circle(image, cv::Point(it->x() * 10, it->y() * 10), 1, cv::Scalar(0, 0, 255), 2, 8, 0);
-    }
-    */
 
     for (int i = 0; i < shortest.size(); i++) {
         Voronoi::Point pos_node = get<1>(shortest[i]);
@@ -444,9 +420,6 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
     }
 
     return image;
-    //cv::startWindowThread();
-    //cv::imshow("Voronoi", image);
-    //cv::waitKey(0);
 }
 
 using namespace boost;
@@ -511,43 +484,41 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
 
     double meta = 0;
 
-    if(a1 < 0 && a2 < 0){
-        if(fabs(a1) > fabs(a2)){
-            meta = ((M_PI - fabs(a2-a1)) / 2) + a2;
-        }else{
-            meta = a2 + (((M_PI - fabs(a2-a1)) / 2) + (a2 + M_PI))  ;
-        }
+    if(a1<0){
+        a1 = 2*M_PI+a1;
+    }
+    if(a2<0){
+        a2 = 2*M_PI+a2;
+    }
+
+    if(a1 < a2){
+        meta = std::fmod((((a1+a2)/2) + M_PI/2), 2*M_PI);
     }else{
-        if(a1 > a2){
-            meta = a2 - (M_PI - fabs(a2-a1)) / 2;
-        }else{
-            meta = a2 + (M_PI - fabs(a2-a1)) / 2;
-        }
+        meta = std::fmod((((a1+a2)/2) - M_PI/2), 2*M_PI);
     }
 
     double a = meta;
 
-    if(a1 < a2){
+    if(a2 < a1){
         if(d1 > d2){
-            double per = d2/d1;
-            a = meta * per;
+            double per = 1- d2/d1;
+            a = meta + (fabs(a2-meta) * per);
         }else if (d2 > d1){
-            double per = 1- d1/d2;
-            a = meta + fabs(a2-a1) * per;
+            double per = d1/d2;
+            a = meta - (fabs(a2-meta) * per);
         }
     }else{
         if(d1 > d2){
             double per = 1- d2/d1;
-            a = meta + fabs(a2-a1) * per;
+            a = meta - (fabs(a2-meta) * per);
         }else if (d2 > d1){
             double per = d1/d2;
-            a = meta * per;
+            a = meta + (fabs(a2-meta) * per);
         }
     }
 
-
     std::cout << "L1: " << d1 << " ; L2:" << d2 << std::endl;
-    std::cout << "A1: " << a1 << " ; A2:" << a2  << " ; Diff:"  << a2-a1 << " ; Angolo metà:"  << meta << "; Angolo di approccio: " << a << std::endl;
+    std::cout << "A1: " << a1 << " ; A2:" << a2  << "; Angolo metà:"  << meta << "; Angolo di approccio: " << a << std::endl;
     std::cout << std::endl;
 
     return a;
@@ -565,11 +536,6 @@ bool coeff_higher(Voronoi::Point first, Voronoi::Point second, Voronoi::Point th
     double m2 = atan2((third.b - second.b), (third.a - second.a));
 
     double diff = fabs(m2 - m1);
-
-    /*std::cout << "P1: " << first.a << "," << first.b << std::endl;
-    std::cout << "P2: " << second.a << "," << second.b << std::endl;
-    std::cout << "P3: " << third.a << "," << third.b << std::endl;*/
-    std::cout << "M1: " << m1 << " ; M2:" << m2 << " ; Diff: " << diff << std::endl;
 
     return diff > threshold_angle;
 }
@@ -613,34 +579,6 @@ void print_dot(Voronoi::Graph myg, std::vector<std::tuple<int, Voronoi::Point, d
         dot_file << "]";
     }
 
-    graph_traits<graph_t>::edge_iterator ei, ei_end;
-    /*for (tie(ei, ei_end) = edges(myg.g); ei != ei_end; ++ei) {
-        graph_traits<graph_t>::edge_descriptor e = *ei;
-        graph_traits<graph_t>::vertex_descriptor
-                u = source(e, myg.g), v = target(e, myg.g);
-
-
-        bool shortest = false;
-
-        //std::cout << "Graph " << u << " : " << v << std::endl;
-
-        for (int i = path.size() - 1; i > 0; i--) {
-            if ((u == path[i].first && v == path[i - 1].first) ||
-                (v == path[i].first && u == path[i - 1].first)) {
-                std::cout << "Trovato " << path[i].first << " : " << path[i - 1].first << std::endl;
-
-                shortest = true;
-            }
-        }
-
-        if (shortest){
-            dot_file << u << " -> " << v
-                     << "[label=\"" << get(myg.weightmap, e) << "\"";
-            dot_file << ", color=\"black\"";
-            dot_file << "]";
-        }
-
-    }*/
     dot_file << "}";
 }
 
@@ -650,8 +588,6 @@ void print_dot(Voronoi::Graph myg, std::vector<std::tuple<int, Voronoi::Point, d
 bool compare_victim_number(std::pair<int, Voronoi::Point> v1, std::pair<int, Voronoi::Point> v2) {
     return (v1.first > v2.first);
 }
-
-
 
 /**
  * Generate graph from voronoi points and calculate the minimum path from robot to gate through the victims

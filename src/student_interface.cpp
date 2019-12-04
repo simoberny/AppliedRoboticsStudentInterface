@@ -169,7 +169,7 @@ namespace student {
 
     void imageUndistort(const cv::Mat &img_in, cv::Mat &img_out,
                         const cv::Mat &cam_matrix, const cv::Mat &dist_coeffs, const std::string &config_folder) {
-        std::cout << "undistortion procedure" << std::endl;
+        //std::cout << "undistortion procedure" << std::endl;
         cv::undistort(img_in, img_out, cam_matrix, dist_coeffs);
 
         //cv::imshow("image undistorted",  img_out);
@@ -353,7 +353,7 @@ namespace student {
 
             //Get the dubins curve
             Dubins dub;
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 14.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 12.0);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;

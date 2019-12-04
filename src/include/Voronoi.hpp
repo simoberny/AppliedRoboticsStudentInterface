@@ -14,19 +14,19 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
-//#include "/home/osboxes/Desktop/boost_1_71_0/boost/polygon/voronoi.hpp"
 #include <fstream>
 #include <vector>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/dijkstra_shortest_paths.hpp>
-#include <boost/polygon/voronoi.hpp>
 #include <math.h>
 #include <tuple>
 
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/linestring.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
+#include "boost/graph/dijkstra_shortest_paths.hpp"
+#include "boost/graph/graph_traits.hpp"
+#include "boost/graph/adjacency_list.hpp"
+
+#include "boost/polygon/voronoi.hpp"
+#include "boost/geometry.hpp"
+#include "boost/geometry/geometries/linestring.hpp"
+#include "boost/geometry/geometries/point_xy.hpp"
 
 using boost::polygon::voronoi_builder;
 using boost::polygon::voronoi_diagram;
@@ -38,8 +38,8 @@ typedef boost::graph_traits<graph_t>::edge_descriptor edge_descriptor;
 typedef std::pair<int, int> Edge;
 
 const double threshold_ricerca = 0.01;
-const double threshold_angle = 0.4;
-const double threshold_dist = 0.12;
+const double threshold_angle = 0.55;
+const double threshold_dist = 0.18;
 
 static double scale = 500.0;
 

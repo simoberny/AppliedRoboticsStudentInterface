@@ -23,11 +23,6 @@ add_executable(calibrate
         src/camera_calibration.cpp
         )
 
-add_executable(test2
-        src/test_envelop.cpp
-        )
-
-
 ## Add executables
 add_executable(test1
         src/test_dubins.cpp

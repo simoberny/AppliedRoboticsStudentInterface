@@ -8,8 +8,6 @@
 
 #include <deque>
 
-#include <boost/foreach.hpp>
-
 #include "include/find_collision.hpp"
 
 Find_collision::Find_collision() {     // Constructor
@@ -57,10 +55,6 @@ Find_collision::robot_obstacles_intersection(const std::vector<Polygon> &obstacl
 
         int k = 0;
         std::cout << " \t AREA intersezione :" << std::endl;
-        BOOST_FOREACH(polygon const &p, output) {
-                        std::cout << k++ << ": " << boost::geometry::area(p) << "risultato: " << result << std::endl;
-
-                    }
 
     }
 
