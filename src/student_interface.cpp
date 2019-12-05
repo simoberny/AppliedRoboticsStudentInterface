@@ -16,20 +16,6 @@
 #include "include/process_arena.hpp"
 #include "include/Voronoi.hpp"
 #include "include/clipper.hpp"
-/*
-//utilizzare per rettangolo che ingloba il poligono e stima dell'area tra poligoni
-#include <iostream>
-
-#include "include/boost/geometry.hpp"
-#include "include/boost/geometry/geometries/box.hpp"
-#include "include/boost/geometry/geometries/point_xy.hpp"
-#include "include/boost/geometry/geometries/polygon.hpp"
-#include "include/boost/geometry/io/wkt/wkt.hpp"
-
-#include <deque>
-
-#include <boost/foreach.hpp>
- */
 
 #include "include/find_collision.hpp"
 
@@ -39,7 +25,14 @@
 //ar_lanch
 //altro t: source environment, lancia pipeline
 
+
+
 namespace student {
+
+    //Robot radius (to enlarge obstacles)
+    int robot_r = 85;
+    //enlarged border raius
+    int border_radius = -20;
 
     int image_index = 0;
 
@@ -283,8 +276,7 @@ namespace student {
     bool processMap(const cv::Mat &img_in, const double scale, std::vector<Polygon> &obstacle_list,
                     std::vector<std::pair<int, Polygon>> &victim_list, Polygon &gate,
                     const std::string &config_folder) {
-        //Robot radius
-        int robot_r = 85;
+
 
         std::cout << "enter in process map" << std::endl;
         const bool res1 = processObstacles(img_in, scale, obstacle_list, robot_r);
@@ -308,6 +300,43 @@ namespace student {
         //System to now how much time takes the plan
         auto started = std::chrono::high_resolution_clock::now();
 
+
+        //procedure to enlarge the borders:
+        ClipperLib::Path srcPoly;
+        ClipperLib::Paths newPoly;
+
+        Polygon enlargeBorder;
+
+        const double INT_ROUND = 1000;
+
+
+        for(size_t a = 0; a < borders.size(); ++a){
+            int bx = borders[a].x * INT_ROUND;
+            int by = borders[a].y * INT_ROUND;
+
+            srcPoly << ClipperLib::IntPoint(bx, by);
+        }
+
+        ClipperLib::ClipperOffset co;
+
+        co.AddPath(srcPoly, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+
+        co.Execute(newPoly, border_radius);
+        std::cout<<"fine esecuzioene, x1: "<<std::endl;
+
+        for(const ClipperLib::Path &path: newPoly){
+            for(const ClipperLib::IntPoint &pt: path){
+                double bbx = pt.X / INT_ROUND;
+                double bby = pt.Y / INT_ROUND;
+                Point t = Point(bbx,bby);
+                enlargeBorder.emplace_back(t);
+            }
+        }
+
+        std::cout<<"fine proedura sul bordo, x1: "<<enlargeBorder[0].x<<" y: "<<enlargeBorder[0].y<<std::endl;
+
+
+
         //Merge of the interecating polygon
         std::vector<Polygon> merged_list = mergePolygon(obstacle_list);
 
@@ -316,13 +345,13 @@ namespace student {
         Voronoi v;
 
         //Calculate the voronoi points
-        v.calculate(merged_list, borders, victim_list, gate, x, y, theta, vd);
+        v.calculate(merged_list, enlargeBorder,borders, victim_list, gate, x, y, theta, vd);
 
         //Generate the graph
         std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list);
 
         //Draw all the scene
-        cv::Mat image = v.draw(merged_list, borders, victim_list, gate, x, y, theta, vd, t);
+        cv::Mat image = v.draw(merged_list, enlargeBorder, victim_list, gate, x, y, theta, vd, t);
         cv::imwrite(config_folder + "/img_voronoi.jpg", image);
 
         static double scale = 500.0;

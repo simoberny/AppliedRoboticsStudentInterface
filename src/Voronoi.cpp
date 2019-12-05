@@ -203,7 +203,7 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
     }
 }
 
-void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
+void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &enlarged_borders, const Polygon &borders,
                         const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
                         const float y, const float theta, voronoi_diagram<double> &vd) {
 
@@ -254,14 +254,14 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
     }
 
 
-    for (int i = 0; i < borders.size(); i++) {
+    for (int i = 0; i <enlarged_borders.size(); i++) {
         //cv::line(image, cv::Point(borders[i].x, borders[i].y), cv::Point(5, 0), cv::Scalar(255, 255, 255), 2, 1);
         if (i <= borders.size() - 2) {
-            segments.push_back(Segment(borders[i].x * scale, borders[i].y * scale, borders[i + 1].x * scale,
-                                       borders[i + 1].y * scale));
+            segments.push_back(Segment(enlarged_borders[i].x * scale, enlarged_borders[i].y * scale, enlarged_borders[i + 1].x * scale,
+                                       enlarged_borders[i + 1].y * scale));
         } else {
-            segments.push_back(Segment(borders[i].x * scale, borders[i].y * scale, borders[0].x * scale,
-                                       borders[0].y * scale));
+            segments.push_back(Segment(enlarged_borders[i].x * scale, enlarged_borders[i].y * scale, enlarged_borders[0].x * scale,
+                                       enlarged_borders[0].y * scale));
         }
     }
 

@@ -38,7 +38,7 @@ typedef boost::graph_traits<graph_t>::edge_descriptor edge_descriptor;
 typedef std::pair<int, int> Edge;
 
 const double threshold_ricerca = 0.01;
-const double threshold_angle = 0.55;
+const double threshold_angle = 0.25;
 const double threshold_dist = 0.18;
 
 static double scale = 500.0;
@@ -131,7 +131,7 @@ public:
 
     Voronoi();
 
-    void calculate(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
+    void calculate(const std::vector<Polygon> &obstacle_list, const Polygon &enlarged_borders, const Polygon &borders,
                    const std::vector<std::pair<int, Polygon>> &victim_list,
                    const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd);
 
