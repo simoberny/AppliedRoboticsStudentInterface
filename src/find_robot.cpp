@@ -16,7 +16,7 @@ namespace student {
             {
                 // You need to check this, but I think index 1 is for saturation, but it might be 0 or 2
                 int idx = 1;
-                img.at<cv::Vec3b>(i,j)[idx] += 1;
+                img.at<cv::Vec3b>(i,j)[idx] += 1.8;
             }
         }
 
@@ -26,7 +26,7 @@ namespace student {
 
         cv::Mat blue_mask;
         //cv::inRange(hsv_img, cv::Scalar(100, 120, 150), cv::Scalar(135, 255, 255), blue_mask);
-        cv::inRange(hsv_img, cv::Scalar(100, 110, 50), cv::Scalar(130, 255, 255), blue_mask);
+        cv::inRange(hsv_img, cv::Scalar(100, 110, 70), cv::Scalar(130, 255, 255), blue_mask);
 
         std::vector<std::vector<cv::Point>> contours;
         cv::findContours(blue_mask, contours,
@@ -44,7 +44,7 @@ namespace student {
         for (int i = 0; i < contours.size(); ++i)    //se per caso il blue mask trova + di 1 figura scelgo sono quella che approssimata ha 3 lati!
         {
             // Approximate the i-th contours
-            cv::approxPolyDP(contours[i], approx_curve, 30, true);
+            cv::approxPolyDP(contours[i], approx_curve, 10, true);
 
 
             // Check the number of edge of the aproximate contour
@@ -55,16 +55,17 @@ namespace student {
             }
         }
 
-        if (approx_curve.size() == 3) {
-            double area = cv::contourArea(approx_curve);
+        double area = cv::contourArea(approx_curve);
 
-            /*std::cout << "-----Aprox Contour size: " << approx_curve.size() << std::endl;
+        if (approx_curve.size() == 3 && area > 500) {
+/*
+            std::cout << "-----Aprox Contour size: " << approx_curve.size() << std::endl;
             std::cout << "Area: " << area << std::endl;
             std::cout << "punti trovati: 1 " << std::endl;
             std::cout << " x " << approx_curve[0].x << " y " << approx_curve[0].y << std::endl;
             std::cout << " x " << approx_curve[1].x << " y " << approx_curve[1].y << std::endl;
-            std::cout << " x " << approx_curve[2].x << " y " << approx_curve[2].y << std::endl;*/
-
+            std::cout << " x " << approx_curve[2].x << " y " << approx_curve[2].y << std::endl;
+*/
             for (const auto &pt: approx_curve) {
                 triangle.emplace_back(pt.x / scale, pt.y / scale);
             }

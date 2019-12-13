@@ -3,12 +3,12 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 
-int get_victim_number(cv::Rect singleRect, cv::Mat img, const std::string &config_folder) {
+int get_victim_number(cv::Rect singleRect, cv::Mat img, cv::Mat &showImage, const std::string &config_folder) {
     cv::Mat hsv_img;
     cv::cvtColor(img, hsv_img, cv::COLOR_BGR2HSV);
 
     cv::Mat green_mask;
-    cv::inRange(hsv_img, cv::Scalar(45, 40, 50), cv::Scalar(75, 255, 255), green_mask);
+    cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
     cv::Mat green_mask_inv;
 
     // Init a matrix specify its dimension (img.rows, img.cols), default color(255,255,255)
@@ -17,6 +17,9 @@ int get_victim_number(cv::Rect singleRect, cv::Mat img, const std::string &confi
 
     // generate binary mask with inverted pixels w.r.t. green mask -> black numbers are part of this mask
     cv::bitwise_not(green_mask, green_mask_inv);
+
+    cv::imshow("Original", green_mask_inv);
+    cv::waitKey(10);
 
     // Load digits template images
     std::vector<cv::Mat> templROIs;
@@ -51,9 +54,9 @@ int get_victim_number(cv::Rect singleRect, cv::Mat img, const std::string &confi
     cv::threshold(processROI, processROI, 100, 255, 0);   // threshold and binarize the image, to suppress some noise
 
     // Apply some additional smoothing and filtering
-    cv::erode(processROI, processROI, kernel);
+    /*cv::erode(processROI, processROI, kernel);
     cv::GaussianBlur(processROI, processROI, cv::Size(5, 5), 2, 2);
-    cv::erode(processROI, processROI, kernel);
+    cv::erode(processROI, processROI, kernel);*/
 
     // Show the actual image used for the template matching
     //cv::imshow("ROI", processROI);
@@ -62,10 +65,10 @@ int get_victim_number(cv::Rect singleRect, cv::Mat img, const std::string &confi
     double maxScore = 0;
     int maxIdx = -1;
     for (int j = 0; j < templROIs.size(); ++j) {
-        for (int a = 0; a < 60; a++) {
+        for (int a = 0; a < 72; a++) {
             cv::Mat result;
             cv::Point2f src_center(templROIs[j].cols / 2.0F, templROIs[j].rows / 2.0F);
-            cv::Mat rot_mat = getRotationMatrix2D(src_center, a * 6, 1.0);
+            cv::Mat rot_mat = getRotationMatrix2D(src_center, a * 5, 1.0);
             cv::Mat dst;
             cv::warpAffine(templROIs[j], dst, rot_mat, templROIs[j].size());
 
@@ -83,7 +86,7 @@ int get_victim_number(cv::Rect singleRect, cv::Mat img, const std::string &confi
     }
 
     cv::Point point0 = cv::Point(singleRect.x, singleRect.y);
-    cv::putText(img, std::to_string(maxIdx + 1), point0, cv::FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv::LINE_AA);
+    cv::putText(showImage, std::to_string(maxIdx + 1), point0, cv::FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv::LINE_AA);
 
     //std::cout << "Best fitting template: " << maxIdx + 1 << std::endl;
     cv::waitKey(20);

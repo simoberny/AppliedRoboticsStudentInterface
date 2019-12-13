@@ -30,7 +30,7 @@
 namespace student {
 
     //Robot radius (to enlarge obstacles)
-    int robot_r = 80;
+    int robot_r = 65;
     //enlarged border raius
     int border_radius = 0;
 
@@ -269,6 +269,44 @@ namespace student {
         return re_border;
     }
 
+    std::vector<Polygon> enlargeObstacle(const std::vector<Polygon> ob, int radius){
+        std::vector<Polygon> enlarged;
+
+        for(int i = 0; i < ob.size(); i++){
+            ClipperLib::Path srcPoly;
+            ClipperLib::Paths newPoly;
+
+            Polygon enlargePoly;
+
+            const double INT_ROUND = 1000;
+
+            for(size_t a = 0; a < ob[i].size(); ++a){
+                int x = ob[i][a].x * INT_ROUND;
+                int y = ob[i][a].y * INT_ROUND;
+
+                srcPoly << ClipperLib::IntPoint(x, y);
+            }
+
+            ClipperLib::ClipperOffset co;
+
+            co.AddPath(srcPoly, ClipperLib::jtSquare, ClipperLib::etClosedPolygon);
+
+            co.Execute(newPoly, radius);
+
+            for(const ClipperLib::Path &path: newPoly){
+                for(const ClipperLib::IntPoint &pt: path){
+                    double x = pt.X / INT_ROUND;
+                    double y = pt.Y / INT_ROUND;
+                    enlargePoly.emplace_back(x, y);
+                }
+            }
+
+            enlarged.emplace_back(enlargePoly);
+        }
+
+        return enlarged;
+    }
+
     std::vector<Polygon> mergePolygon(const std::vector<Polygon> &obstacle_list, const Polygon &borders){
         std::vector<Polygon> new_list;
         std::vector<Polygon> clipped_list;
@@ -335,7 +373,7 @@ namespace student {
                     std::vector<std::pair<int, Polygon>> &victim_list, Polygon &gate,
                     const std::string &config_folder) {
         //aumento luminosità.... penultimo parametro é alfa, ultimo è beta  pixel = pixel*alfa+beta
-        img_in.convertTo(img_in, -1, 1.2, 0);
+        img_in.convertTo(img_in, -1, 1.3, 0);
         //aumento della staturazione
         // BGR to HSV
         cv::Mat img;
@@ -346,23 +384,24 @@ namespace student {
             {
                 // You need to check this, but I think index 1 is for saturation, but it might be 0 or 2
                 int idx = 1;
-                img.at<cv::Vec3b>(i,j)[idx] += 0.5;
+                img.at<cv::Vec3b>(i,j)[idx] += 2.3;
             }
         }
 
 // HSV back to BGR
         cv::cvtColor(img, img_in, cv::COLOR_HSV2BGR);
 
+        cv::Mat showImage = img_in.clone();
 
         std::cout << "enter in process map" << std::endl;
-        const bool res1 = processObstacles(img_in, scale, obstacle_list, robot_r);
+        const bool res1 = processObstacles(img_in, showImage, scale, obstacle_list, robot_r);
         if (!res1) std::cout << "processObstacles return false" << std::endl;
-        const bool res2 = processGate(img_in, scale, gate);
+        const bool res2 = processGate(img_in, showImage, scale, gate);
         if (!res2) std::cout << "processGate return false" << std::endl;
-        const bool res3 = processVictims(img_in, scale, victim_list, config_folder);
+        const bool res3 = processVictims(img_in, showImage, scale, victim_list, config_folder);
         if (!res3) std::cout << "processVictims return false" << std::endl;
 
-        cv::imwrite(config_folder + "/img_obstacle_recognition.jpg", img_in);
+        cv::imwrite(config_folder + "/img_obstacle_recognition.jpg",showImage);
 
         //cv::imshow("Original", img_in);
         //cv::waitKey(1000);
@@ -373,26 +412,17 @@ namespace student {
     bool planPath(const Polygon &borders, const std::vector<Polygon> &obstacle_list,
                   const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
                   const float y, const float theta, Path &path, const string &config_folder) {
-
-        std::cout << "Borders: " << std::endl;
-        for(int i = 0; i < borders.size(); i++){
-            std::cout << i << ": " << borders[i].x << "," << borders[i].y << std::endl;
-        }
-        std::cout << std::endl;
-
         //System to now how much time takes the plan
         auto started = std::chrono::high_resolution_clock::now();
 
-        Polygon resized_border = resizeBorders(borders, 0.05);
+        //Resize of the arena 
+        Polygon resized_border = resizeBorders(borders, 0.06);
 
-        std::cout << "Borders resized: " << std::endl;
-        for(int i = 0; i < resized_border.size(); i++){
-            std::cout << i << ": " << resized_border[i].x << "," << resized_border[i].y << std::endl;
-        }
-        std::cout << std::endl;
+        //Enlargement of the obstacle
+        std::vector<Polygon> englarge_obstacle = enlargeObstacle(obstacle_list, robot_r);
 
         //Merge of the interecating polygon
-        std::vector<Polygon> merged_list = mergePolygon(obstacle_list, resized_border);
+        std::vector<Polygon> merged_list = mergePolygon(englarge_obstacle, resized_border);
 
         //Initialize voronoi diagram
         voronoi_diagram<double> vd;
@@ -438,7 +468,7 @@ namespace student {
             //Get the dubins curve
             Dubins dub;
 
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 12.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 20.0);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;

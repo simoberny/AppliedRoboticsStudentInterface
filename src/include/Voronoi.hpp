@@ -39,8 +39,8 @@ typedef std::pair<int, int> Edge;
 
 const double threshold_ricerca = 0.01;
 
-const double threshold_angle = 0.10;
-const double threshold_dist = 0.15;
+const double threshold_angle = 0.20;
+const double threshold_dist = 0.14;
 
 static double scale = 500.0;
 
