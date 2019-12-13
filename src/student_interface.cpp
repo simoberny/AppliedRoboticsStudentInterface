@@ -245,7 +245,7 @@ namespace student {
         return (i1.second < i2.second);
     }
 
-    Polygon resizeBorders(const Polygon &borders, double resize){
+    Polygon resizeBorders(const Polygon &borders,  const Polygon &gate, double resize){
         Polygon re_border;
         for(auto &pt: borders){
             double b_x = pt.x;
@@ -309,9 +309,8 @@ namespace student {
             inter.AddPaths(subj, ClipperLib::ptSubject, true);
         }
 
-        Polygon inc_border = resizeBorders(borders, 0.01);
 
-        for(auto &pt: inc_border){
+        for(auto &pt: borders){
             clip[0] << ClipperLib::IntPoint(pt.x*1000, pt.y*1000);
         }
 
@@ -365,7 +364,7 @@ namespace student {
         //System to now how much time takes the plan
         auto started = std::chrono::high_resolution_clock::now();
 
-        Polygon resized_border = resizeBorders(borders, 0.05);
+        Polygon resized_border = resizeBorders(borders, gate, 0.05);
 
         std::cout << "Borders resized: " << std::endl;
         for(int i = 0; i < resized_border.size(); i++){
@@ -381,7 +380,7 @@ namespace student {
         Voronoi v;
 
         //Calculate the voronoi points
-        v.calculate(merged_list, resized_border, borders, victim_list, gate, x, y, theta, vd);
+        v.calculate(merged_list, resized_border, resized_border, victim_list, gate, x, y, theta, vd);
 
         //Generate the graph
         std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list, theta);

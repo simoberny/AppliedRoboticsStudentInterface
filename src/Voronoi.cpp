@@ -289,9 +289,6 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
     }
 
     construct_voronoi(points.begin(), points.end(), segments.begin(), segments.end(), &vd);
-
-
-
 }
 
 bool voronoi_match_obstacles(std::vector<Polygon> merged_obstacles,double x,double y){
@@ -725,6 +722,8 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
 
         get<2>(shortest_path[i]) = angle;
     }
+
+    
 
     print_dot(myg, shortest_path);
     return shortest_path;

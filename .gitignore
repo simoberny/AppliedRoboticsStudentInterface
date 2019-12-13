@@ -5,6 +5,8 @@ cmake-build-debug/
 .vscode/
 CMakeFiles/
 
+config_folder/
+
 # Prerequisites
 *.d
 
