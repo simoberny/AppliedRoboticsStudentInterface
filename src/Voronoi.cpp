@@ -472,13 +472,13 @@ void clean_path(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int, b
 }
 
 double angolo_interno(double angle1, double meta){
-    if(angle1-meta >0 && angle1-meta < M_PI)
+    if(angle1-meta >=0 && angle1-meta < M_PI)
         return angle1-meta;
-    if(angle1-meta <0 && meta-angle1 < M_PI)
+    else if(angle1-meta <0 && meta-angle1 < M_PI)
         return meta-angle1;
-    if(angle1-meta >0 && angle1-meta > M_PI)
+    else if(angle1-meta >=0 && angle1-meta > M_PI)
         return 2*M_PI-(angle1-meta);
-    if(angle1-meta <0 && meta-angle1 > M_PI)
+    else if(angle1-meta <0 && meta-angle1 > M_PI)
         return 2*M_PI-(meta-angle1);
     return meta;
 }
@@ -512,6 +512,9 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
     }else{
         meta = std::fmod((((a1+a2)/2) - M_PI/2), 2*M_PI);
     }
+    if(meta<0){
+        meta = 2*M_PI+meta;
+    }
 
     double a = meta;
 
@@ -533,6 +536,7 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
         }
     }
     a = std::fmod(a, 2*M_PI);
+
     std::cout << "L1: " << d1 << " ; L2:" << d2 << std::endl;
     std::cout << "A1: " << a1 << " ; A2:" << a2  << "; Angolo metà:"  << meta << "; Angolo di approccio: " << a << std::endl;
     std::cout << std::endl;

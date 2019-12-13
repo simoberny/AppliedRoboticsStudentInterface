@@ -6,7 +6,6 @@
 //TODO: x ottimizzare la conversion in hsv potrebbe essere fatta 1 solo vaolta!
 
 bool processObstacles(const cv::Mat &img_in, const double scale, std::vector<Polygon> &obstacle_list, int radius) {
-    img_in.convertTo(img_in, -1, 1.5, 0);
 
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);

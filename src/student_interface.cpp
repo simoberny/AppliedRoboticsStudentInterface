@@ -276,6 +276,24 @@ namespace student {
     bool processMap(const cv::Mat &img_in, const double scale, std::vector<Polygon> &obstacle_list,
                     std::vector<std::pair<int, Polygon>> &victim_list, Polygon &gate,
                     const std::string &config_folder) {
+        //aumento luminosità.... penultimo parametro é alfa, ultimo è beta  pixel = pixel*alfa+beta
+        img_in.convertTo(img_in, -1, 1.2, 0);
+        //aumento della staturazione
+        // BGR to HSV
+        cv::Mat img;
+        cv::cvtColor(img_in, img, cv::COLOR_BGR2HSV);
+        for (int i=0; i < img.rows ; i++)
+        {
+            for(int j=0; j < img.cols; j++)
+            {
+                // You need to check this, but I think index 1 is for saturation, but it might be 0 or 2
+                int idx = 1;
+                img.at<cv::Vec3b>(i,j)[idx] += 0.5;
+            }
+        }
+
+// HSV back to BGR
+        cv::cvtColor(img, img_in, cv::COLOR_HSV2BGR);
 
 
         std::cout << "enter in process map" << std::endl;
@@ -379,7 +397,7 @@ namespace student {
 
             //Get the dubins curve
             Dubins dub;
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 14.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 20.0);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;
