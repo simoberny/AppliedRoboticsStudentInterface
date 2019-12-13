@@ -8,7 +8,7 @@ int get_victim_number(cv::Rect singleRect, cv::Mat img, const std::string &confi
     cv::cvtColor(img, hsv_img, cv::COLOR_BGR2HSV);
 
     cv::Mat green_mask;
-    cv::inRange(hsv_img, cv::Scalar(45, 40, 40), cv::Scalar(75, 255, 255), green_mask);
+    cv::inRange(hsv_img, cv::Scalar(45, 40, 50), cv::Scalar(75, 255, 255), green_mask);
     cv::Mat green_mask_inv;
 
     // Init a matrix specify its dimension (img.rows, img.cols), default color(255,255,255)
@@ -62,10 +62,10 @@ int get_victim_number(cv::Rect singleRect, cv::Mat img, const std::string &confi
     double maxScore = 0;
     int maxIdx = -1;
     for (int j = 0; j < templROIs.size(); ++j) {
-        for (int a = 0; a < 30; a++) {
+        for (int a = 0; a < 60; a++) {
             cv::Mat result;
             cv::Point2f src_center(templROIs[j].cols / 2.0F, templROIs[j].rows / 2.0F);
-            cv::Mat rot_mat = getRotationMatrix2D(src_center, a * 12, 1.0);
+            cv::Mat rot_mat = getRotationMatrix2D(src_center, a * 6, 1.0);
             cv::Mat dst;
             cv::warpAffine(templROIs[j], dst, rot_mat, templROIs[j].size());
 

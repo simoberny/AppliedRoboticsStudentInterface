@@ -6,15 +6,15 @@
 //TODO: x ottimizzare la conversion in hsv potrebbe essere fatta 1 solo vaolta!
 
 bool processObstacles(const cv::Mat &img_in, const double scale, std::vector<Polygon> &obstacle_list, int radius) {
+    img_in.convertTo(img_in, -1, 1.5, 0);
 
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
 
     cv::Mat red_mask_low, red_mask_high, red_mask;
-    cv::inRange(hsv_img, cv::Scalar(0, 10, 10), cv::Scalar(15, 255, 255), red_mask_low);
-    cv::inRange(hsv_img, cv::Scalar(175, 10, 10), cv::Scalar(179, 255, 255), red_mask_high);
+    cv::inRange(hsv_img, cv::Scalar(0, 30, 60), cv::Scalar(15, 255, 255), red_mask_low);
+    cv::inRange(hsv_img, cv::Scalar(175, 30, 60), cv::Scalar(179, 255, 255), red_mask_high);
     cv::addWeighted(red_mask_low, 1.0, red_mask_high, 1.0, 0.0, red_mask);
-
 
     std::vector<std::vector<cv::Point>> contours, contours_approx;
     std::vector<cv::Point> approx_curve;
@@ -148,7 +148,7 @@ bool processVictims(const cv::Mat &img_in, const double scale, std::vector<std::
         //std::cout << (i+1) << ") Contour size: " << contours[i].size() << std::endl;
         approxPolyDP(contours[i], approx_curve, 1, true);
 
-        if (approx_curve.size() > 6) {
+        if (approx_curve.size() > 10) {
             Polygon scaled_contour;
             for (const auto &pt: approx_curve) {
                 scaled_contour.emplace_back(pt.x / scale, pt.y / scale);

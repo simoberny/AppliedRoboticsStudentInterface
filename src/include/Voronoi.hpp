@@ -38,8 +38,13 @@ typedef boost::graph_traits<graph_t>::edge_descriptor edge_descriptor;
 typedef std::pair<int, int> Edge;
 
 const double threshold_ricerca = 0.01;
+<<<<<<< HEAD
 const double threshold_angle = 0.20;
 const double threshold_dist = 0.18;
+=======
+const double threshold_angle = 0.35;
+const double threshold_dist = 0.15;
+>>>>>>> 0af12e3794817988efd9883015890ca081fc15a7
 
 static double scale = 500.0;
 
@@ -131,7 +136,7 @@ public:
 
     Voronoi();
 
-    void calculate(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
+    void calculate(const std::vector<Polygon> &obstacle_list, const Polygon &enlarged_borders, const Polygon &borders,
                    const std::vector<std::pair<int, Polygon>> &victim_list,
                    const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd);
 
@@ -140,7 +145,7 @@ public:
               const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd,
               const std::vector<std::tuple<int, Voronoi::Point, double> > te);
 
-    std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles);
+    std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta);
 };
 
 

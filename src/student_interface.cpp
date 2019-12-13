@@ -16,20 +16,6 @@
 #include "include/process_arena.hpp"
 #include "include/Voronoi.hpp"
 #include "include/clipper.hpp"
-/*
-//utilizzare per rettangolo che ingloba il poligono e stima dell'area tra poligoni
-#include <iostream>
-
-#include "include/boost/geometry.hpp"
-#include "include/boost/geometry/geometries/box.hpp"
-#include "include/boost/geometry/geometries/point_xy.hpp"
-#include "include/boost/geometry/geometries/polygon.hpp"
-#include "include/boost/geometry/io/wkt/wkt.hpp"
-
-#include <deque>
-
-#include <boost/foreach.hpp>
- */
 
 #include "include/find_collision.hpp"
 
@@ -39,7 +25,14 @@
 //ar_lanch
 //altro t: source environment, lancia pipeline
 
+
+
 namespace student {
+
+    //Robot radius (to enlarge obstacles)
+    int robot_r = 80;
+    //enlarged border raius
+    int border_radius = 0;
 
     int image_index = 0;
 
@@ -339,8 +332,7 @@ namespace student {
     bool processMap(const cv::Mat &img_in, const double scale, std::vector<Polygon> &obstacle_list,
                     std::vector<std::pair<int, Polygon>> &victim_list, Polygon &gate,
                     const std::string &config_folder) {
-        //Robot radius
-        int robot_r = 85;
+
 
         std::cout << "enter in process map" << std::endl;
         const bool res1 = processObstacles(img_in, scale, obstacle_list, robot_r);
@@ -381,13 +373,13 @@ namespace student {
         Voronoi v;
 
         //Calculate the voronoi points
-        v.calculate(merged_list, resized_border, victim_list, gate, x, y, theta, vd);
+        v.calculate(merged_list, resized_border,borders, victim_list, gate, x, y, theta, vd);
 
         //Generate the graph
-        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list);
+        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list, theta);
 
         //Draw all the scene
-        cv::Mat image = v.draw(merged_list, borders, victim_list, gate, x, y, theta, vd, t);
+        cv::Mat image = v.draw(merged_list, enlargeBorder, victim_list, gate, x, y, theta, vd, t);
         cv::imwrite(config_folder + "/img_voronoi.jpg", image);
 
         static double scale = 500.0;
@@ -397,7 +389,7 @@ namespace student {
         //Initial robot position
         double rob_x = x;
         double rob_y = y;
-        double rob_theta = 0;
+        double rob_theta = theta;
 
         //Gate centroid = final position
         pair<double, double> gate_centroid = calcCentroid(gate);
@@ -418,7 +410,7 @@ namespace student {
 
             //Get the dubins curve
             Dubins dub;
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 11.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 12.0);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;

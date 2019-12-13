@@ -160,6 +160,8 @@ compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<s
             std::cout << "vertex added: x: " << cross_vertex[i][0] << " y: " << cross_vertex[i][1] << " " << std::endl;
         }
     }
+
+    std::cout << "Ho trovato triangolo!" << std::endl;
 }
 
 
@@ -201,9 +203,11 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
         triangle_robot.emplace_back(v2);
         triangle_robot.emplace_back(v3);
     }
+
+    std::cout << "Ho trovato triangolo robot!" << std::endl;
 }
 
-void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
+void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &enlarged_borders, const Polygon &borders,
                         const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
                         const float y, const float theta, voronoi_diagram<double> &vd) {
 
@@ -254,14 +258,14 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
     }
 
 
-    for (int i = 0; i < borders.size(); i++) {
+    for (int i = 0; i <enlarged_borders.size(); i++) {
         //cv::line(image, cv::Point(borders[i].x, borders[i].y), cv::Point(5, 0), cv::Scalar(255, 255, 255), 2, 1);
         if (i <= borders.size() - 2) {
-            segments.push_back(Segment(borders[i].x * scale, borders[i].y * scale, borders[i + 1].x * scale,
-                                       borders[i + 1].y * scale));
+            segments.push_back(Segment(enlarged_borders[i].x * scale, enlarged_borders[i].y * scale, enlarged_borders[i + 1].x * scale,
+                                       enlarged_borders[i + 1].y * scale));
         } else {
-            segments.push_back(Segment(borders[i].x * scale, borders[i].y * scale, borders[0].x * scale,
-                                       borders[0].y * scale));
+            segments.push_back(Segment(enlarged_borders[i].x * scale, enlarged_borders[i].y * scale, enlarged_borders[0].x * scale,
+                                       enlarged_borders[0].y * scale));
         }
     }
 
@@ -467,6 +471,18 @@ void clean_path(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int, b
     std::cout << std::endl;
 }
 
+double angolo_interno(double angle1, double meta){
+    if(angle1-meta >0 && angle1-meta < M_PI)
+        return angle1-meta;
+    if(angle1-meta <0 && meta-angle1 < M_PI)
+        return meta-angle1;
+    if(angle1-meta >0 && angle1-meta > M_PI)
+        return 2*M_PI-(angle1-meta);
+    if(angle1-meta <0 && meta-angle1 > M_PI)
+        return 2*M_PI-(meta-angle1);
+    return meta;
+}
+
 /**
  * Get the approach angle of a point
  */
@@ -501,22 +517,22 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
 
     if(a2 < a1){
         if(d1 > d2){
-            double per = 1- d2/d1;
-            a = meta + (fabs(a2-meta) * per);
+            double per = 1- d2/d1;            
+            a = meta + (angolo_interno(a2,meta) * per);
         }else if (d2 > d1){
             double per = d1/d2;
-            a = meta - (fabs(a2-meta) * per);
+            a = meta - (angolo_interno(a2,meta) * per);
         }
     }else{
         if(d1 > d2){
             double per = 1- d2/d1;
-            a = meta - (fabs(a2-meta) * per);
+            a = meta - (angolo_interno(a2,meta) * per);
         }else if (d2 > d1){
             double per = d1/d2;
-            a = meta + (fabs(a2-meta) * per);
+            a = meta + (angolo_interno(a2,meta) * per);
         }
     }
-
+    a = std::fmod(a, 2*M_PI);
     std::cout << "L1: " << d1 << " ; L2:" << d2 << std::endl;
     std::cout << "A1: " << a1 << " ; A2:" << a2  << "; Angolo metà:"  << meta << "; Angolo di approccio: " << a << std::endl;
     std::cout << std::endl;
@@ -594,7 +610,7 @@ bool compare_victim_number(std::pair<int, Voronoi::Point> v1, std::pair<int, Vor
  * @param vd Voronoi diagram
  * @return Minimum point path including approach angle
  */
-std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles) {
+std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta) {
     //Graph struct
     Graph myg;
 
@@ -679,7 +695,7 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         } else if (i == path.size() - 1) { // Add the robot pos
             shortest_path.emplace_back(
                     std::make_tuple(path[i].first, Voronoi::Point(myg.vertex_map[path[i].first].a * scale,
-                                                                  myg.vertex_map[path[i].first].b * scale), 0));
+                                                                  myg.vertex_map[path[i].first].b * scale), theta));
         } else if (i < path.size() - 1 && i != 0) { // For every other point
             if (path[i].second) { // If it's a key point, add it without any doubt
                 shortest_path.emplace_back(
