@@ -5,7 +5,7 @@ namespace student {
                    const std::string &config_folder) {
 
         //aumento luminosità.... penultimo parametro é alfa, ultimo è beta  pixel = pixel*alfa+beta
-        img_in.convertTo(img_in, -1, 1.2, 0);
+        img_in.convertTo(img_in, -1, 1.5, 0);
         //aumento della staturazione
         // BGR to HSV
         cv::Mat img;
@@ -16,7 +16,7 @@ namespace student {
             {
                 // You need to check this, but I think index 1 is for saturation, but it might be 0 or 2
                 int idx = 1;
-                img.at<cv::Vec3b>(i,j)[idx] += 0.7;
+                img.at<cv::Vec3b>(i,j)[idx] += 1;
             }
         }
 
@@ -25,8 +25,8 @@ namespace student {
         cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
 
         cv::Mat blue_mask;
-        cv::inRange(hsv_img, cv::Scalar(100, 120, 150), cv::Scalar(135, 255, 255), blue_mask);
-        //cv::inRange(hsv_img, cv::Scalar(100, 110, 50), cv::Scalar(130, 255, 255), blue_mask);
+        //cv::inRange(hsv_img, cv::Scalar(100, 120, 150), cv::Scalar(135, 255, 255), blue_mask);
+        cv::inRange(hsv_img, cv::Scalar(100, 110, 50), cv::Scalar(130, 255, 255), blue_mask);
 
         std::vector<std::vector<cv::Point>> contours;
         cv::findContours(blue_mask, contours,

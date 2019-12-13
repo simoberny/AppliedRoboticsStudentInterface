@@ -96,7 +96,7 @@ distance_line_line(double l1_x1, double l1_y1, double l1_x2, double l1_y2, doubl
 }
 
 void
-compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<std::vector<double>> &triangle_gate) {
+compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<std::vector<double>> &triangle_gate, double& gate_angle) {
     double triangle_length = 0.03;
     std::pair<double, double> gate_center = calcCentroid(gate);
     std::vector<double> v1 = {gate_center.first, gate_center.second};
@@ -161,7 +161,32 @@ compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<s
         }
     }
 
-    std::cout << "Ho trovato triangolo!" << std::endl;
+
+    double a1 = atan2((triangle_gate[1][1] - triangle_gate[0][1]), (triangle_gate[1][0] - triangle_gate[0][0]));
+    double a2 = atan2((triangle_gate[2][1] - triangle_gate[0][1]), (triangle_gate[2][0] - triangle_gate[0][0]));
+
+    double meta = 0;
+
+    if(a1<0){
+        a1 = 2*M_PI+a1;
+    }
+    if(a2<0){
+        a2 = 2*M_PI+a2;
+    }
+
+    if(a1 < a2){
+        meta = std::fmod((((a1+a2)/2)), 2*M_PI);
+    }else{
+        meta = std::fmod((((a1+a2)/2)), 2*M_PI);
+    }
+    if(meta<0){
+        meta = 2*M_PI+meta;
+    }
+    gate_angle = std::fmod(meta+M_PI, 2*M_PI);
+    //    il robot deve entrare quindi +pigregco
+
+    std::cout << "trovato gate.... angolo a meta: " << meta<< std::endl;
+
 }
 
 
@@ -209,7 +234,7 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
 
 void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &enlarged_borders, const Polygon &borders,
                         const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
-                        const float y, const float theta, voronoi_diagram<double> &vd) {
+                        const float y, const float theta, voronoi_diagram<double> &vd, double& gate_angle) {
 
     std::vector<Point> points;
     std::vector<Segment> segments;
@@ -229,7 +254,7 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
 
 
     std::vector<std::vector<double>> triangle_gate;
-    compute_triangle_gate(borders, gate, triangle_gate);
+    compute_triangle_gate(borders, gate, triangle_gate, gate_angle);
 
     segments.push_back(Segment(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale, triangle_gate[1][0] * scale,
                                triangle_gate[1][1] * scale));
@@ -316,7 +341,8 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
     cv::Mat image = cv::Mat::zeros(600, 1000, CV_8UC3);
 
     std::vector<std::vector<double>> triangle_gate;
-    compute_triangle_gate(borders, gate, triangle_gate);
+    double gate_angle;
+    compute_triangle_gate(borders, gate, triangle_gate, gate_angle);
 
     cv::line(image, cv::Point(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale),
              cv::Point(triangle_gate[1][0] * scale, triangle_gate[1][1] * scale), cv::Scalar(0, 87, 205), 2, 1);
@@ -614,7 +640,7 @@ bool compare_victim_number(std::pair<int, Voronoi::Point> v1, std::pair<int, Vor
  * @param vd Voronoi diagram
  * @return Minimum point path including approach angle
  */
-std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta) {
+std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta, double& gate_angle) {
     //Graph struct
     Graph myg;
 
@@ -695,7 +721,7 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         if (i == 0) { // Add the gate pos
             shortest_path.emplace_back(
                     std::make_tuple(path[i].first, Voronoi::Point(myg.vertex_map[path[i].first].a * scale,
-                                                                  myg.vertex_map[path[i].first].b * scale), M_PI / 2));
+                                                                  myg.vertex_map[path[i].first].b * scale), gate_angle));
         } else if (i == path.size() - 1) { // Add the robot pos
             shortest_path.emplace_back(
                     std::make_tuple(path[i].first, Voronoi::Point(myg.vertex_map[path[i].first].a * scale,

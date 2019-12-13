@@ -33,7 +33,6 @@ add_library(dubins SHARED
         src/dubins.cpp
         )
 
-
 ## Add shared library
 add_library(student SHARED
         src/student_interface.cpp
@@ -55,7 +54,4 @@ target_link_libraries(calibrate
         ${OpenCV_LIBRARIES}
         )
 
-target_link_libraries(test1
-        dubins
-        )
 
