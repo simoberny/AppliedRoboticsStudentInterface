@@ -252,10 +252,36 @@ namespace student {
         return (i1.second < i2.second);
     }
 
-    std::vector<Polygon> mergePolygon(const std::vector<Polygon> &obstacle_list){
+    Polygon resizeBorders(const Polygon &borders){
+        Polygon re_border;
+        for(auto &pt: borders){
+            double b_x = pt.x;
+            double b_y = pt.y;
+
+            if(b_x < 0.50){
+                b_x += 0.10;
+            }else{
+                b_x -= 0.10;
+            }
+
+            if(b_y < 0.50){
+                b_y += 0.10;
+            }else{
+                b_y -= 0.10;
+            }
+
+            re_border.emplace_back(Point(b_x, b_y));
+        }
+
+        return re_border;
+    }
+
+    std::vector<Polygon> mergePolygon(const std::vector<Polygon> &obstacle_list, const Polygon &borders){
         std::vector<Polygon> new_list;
+        std::vector<Polygon> clipped_list;
         ClipperLib::Paths solution;
         ClipperLib::Clipper c;
+        ClipperLib::Paths clip(1);
 
         for(int i= 0; i < obstacle_list.size(); i++){
             ClipperLib::Paths subj(1);
@@ -277,7 +303,37 @@ namespace student {
             new_list.emplace_back(p);
         }
 
-        return new_list;
+
+        ClipperLib::Clipper inter;
+        ClipperLib::Paths sol2;
+
+        for(int i= 0; i < new_list.size(); i++){
+            ClipperLib::Paths subj(1);
+            for (const auto &pt: new_list[i]) {
+                subj[0] << ClipperLib::IntPoint(pt.x*1000, pt.y*1000);
+            }
+
+            inter.AddPaths(subj, ClipperLib::ptSubject, true);
+        }
+
+        for(auto &pt: borders){
+            clip[0] << ClipperLib::IntPoint(pt.x*1000, pt.y*1000);
+        }
+
+        inter.AddPaths(clip, ClipperLib::ptClip, true);
+        inter.Execute(ClipperLib::ctIntersection, sol2, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+        for(int i= 0; i < sol2.size(); i++){
+            Polygon p;
+            for (const auto &pt: sol2[i]) {
+                p.push_back(Point((double) pt.X/1000.0, (double)pt.Y/1000.0));
+            }
+
+            clipped_list.emplace_back(p);
+        }
+
+
+        return clipped_list;
     }
 
     bool processMap(const cv::Mat &img_in, const double scale, std::vector<Polygon> &obstacle_list,
@@ -305,18 +361,27 @@ namespace student {
     bool planPath(const Polygon &borders, const std::vector<Polygon> &obstacle_list,
                   const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
                   const float y, const float theta, Path &path, const string &config_folder) {
+
+        std::cout << "Borders: " << std::endl;
+        for(int i = 0; i < borders.size(); i++){
+            std::cout << i << ": " << borders[i].x << "," << borders[i].y << std::endl;
+        }
+        std::cout << std::endl;
+
         //System to now how much time takes the plan
         auto started = std::chrono::high_resolution_clock::now();
 
+        Polygon resized_border = resizeBorders(borders);
+
         //Merge of the interecating polygon
-        std::vector<Polygon> merged_list = mergePolygon(obstacle_list);
+        std::vector<Polygon> merged_list = mergePolygon(obstacle_list, resized_border);
 
         //Initialize voronoi diagram
         voronoi_diagram<double> vd;
         Voronoi v;
 
         //Calculate the voronoi points
-        v.calculate(merged_list, borders, victim_list, gate, x, y, theta, vd);
+        v.calculate(merged_list, resized_border, victim_list, gate, x, y, theta, vd);
 
         //Generate the graph
         std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list);
@@ -353,7 +418,7 @@ namespace student {
 
             //Get the dubins curve
             Dubins dub;
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 12.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 11.0);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;

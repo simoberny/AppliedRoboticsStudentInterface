@@ -20,7 +20,6 @@ bool processObstacles(const cv::Mat &img_in, const double scale, std::vector<Pol
     std::vector<cv::Point> approx_curve;
     cv::Mat contours_img;
 
-
     cv::findContours(red_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     drawContours(contours_img, contours, -1, cv::Scalar(40, 190, 40), 1, cv::LINE_AA);
 
