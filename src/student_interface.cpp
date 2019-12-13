@@ -245,22 +245,22 @@ namespace student {
         return (i1.second < i2.second);
     }
 
-    Polygon resizeBorders(const Polygon &borders){
+    Polygon resizeBorders(const Polygon &borders, double resize){
         Polygon re_border;
         for(auto &pt: borders){
             double b_x = pt.x;
             double b_y = pt.y;
 
             if(b_x < 0.50){
-                b_x += 0.10;
+                b_x += resize;
             }else{
-                b_x -= 0.10;
+                b_x -= resize;
             }
 
             if(b_y < 0.50){
-                b_y += 0.10;
+                b_y += resize;
             }else{
-                b_y -= 0.10;
+                b_y -= resize;
             }
 
             re_border.emplace_back(Point(b_x, b_y));
@@ -309,7 +309,9 @@ namespace student {
             inter.AddPaths(subj, ClipperLib::ptSubject, true);
         }
 
-        for(auto &pt: borders){
+        Polygon inc_border = resizeBorders(borders, 0.01);
+
+        for(auto &pt: inc_border){
             clip[0] << ClipperLib::IntPoint(pt.x*1000, pt.y*1000);
         }
 
@@ -363,7 +365,13 @@ namespace student {
         //System to now how much time takes the plan
         auto started = std::chrono::high_resolution_clock::now();
 
-        Polygon resized_border = resizeBorders(borders);
+        Polygon resized_border = resizeBorders(borders, 0.05);
+
+        std::cout << "Borders resized: " << std::endl;
+        for(int i = 0; i < resized_border.size(); i++){
+            std::cout << i << ": " << resized_border[i].x << "," << resized_border[i].y << std::endl;
+        }
+        std::cout << std::endl;
 
         //Merge of the interecating polygon
         std::vector<Polygon> merged_list = mergePolygon(obstacle_list, resized_border);
@@ -373,13 +381,13 @@ namespace student {
         Voronoi v;
 
         //Calculate the voronoi points
-        v.calculate(merged_list, resized_border,borders, victim_list, gate, x, y, theta, vd);
+        v.calculate(merged_list, resized_border, borders, victim_list, gate, x, y, theta, vd);
 
         //Generate the graph
         std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list, theta);
 
         //Draw all the scene
-        cv::Mat image = v.draw(merged_list, enlargeBorder, victim_list, gate, x, y, theta, vd, t);
+        cv::Mat image = v.draw(merged_list, resized_border, victim_list, gate, x, y, theta, vd, t);
         cv::imwrite(config_folder + "/img_voronoi.jpg", image);
 
         static double scale = 500.0;

@@ -38,13 +38,9 @@ typedef boost::graph_traits<graph_t>::edge_descriptor edge_descriptor;
 typedef std::pair<int, int> Edge;
 
 const double threshold_ricerca = 0.01;
-<<<<<<< HEAD
-const double threshold_angle = 0.20;
-const double threshold_dist = 0.18;
-=======
+
 const double threshold_angle = 0.35;
 const double threshold_dist = 0.15;
->>>>>>> 0af12e3794817988efd9883015890ca081fc15a7
 
 static double scale = 500.0;
 
