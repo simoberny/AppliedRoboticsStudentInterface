@@ -30,9 +30,9 @@
 namespace student {
 
     //Robot radius (to enlarge obstacles)
-    int robot_r = 85;
+    int robot_r = 80;
     //enlarged border raius
-    int border_radius = -20;
+    int border_radius = 0;
 
     int image_index = 0;
 
@@ -309,7 +309,6 @@ namespace student {
 
         const double INT_ROUND = 1000;
 
-
         for(size_t a = 0; a < borders.size(); ++a){
             int bx = borders[a].x * INT_ROUND;
             int by = borders[a].y * INT_ROUND;
@@ -335,8 +334,6 @@ namespace student {
 
         std::cout<<"fine proedura sul bordo, x1: "<<enlargeBorder[0].x<<" y: "<<enlargeBorder[0].y<<std::endl;
 
-
-
         //Merge of the interecating polygon
         std::vector<Polygon> merged_list = mergePolygon(obstacle_list);
 
@@ -348,7 +345,7 @@ namespace student {
         v.calculate(merged_list, enlargeBorder,borders, victim_list, gate, x, y, theta, vd);
 
         //Generate the graph
-        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list);
+        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list, theta);
 
         //Draw all the scene
         cv::Mat image = v.draw(merged_list, enlargeBorder, victim_list, gate, x, y, theta, vd, t);
@@ -361,7 +358,7 @@ namespace student {
         //Initial robot position
         double rob_x = x;
         double rob_y = y;
-        double rob_theta = 0;
+        double rob_theta = theta;
 
         //Gate centroid = final position
         pair<double, double> gate_centroid = calcCentroid(gate);
@@ -382,7 +379,7 @@ namespace student {
 
             //Get the dubins curve
             Dubins dub;
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 12.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 14.0);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;

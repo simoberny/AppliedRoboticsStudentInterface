@@ -3,11 +3,12 @@
 namespace student {
     bool findRobot(const cv::Mat &img_in, const double scale, Polygon &triangle, double &x, double &y, double &theta,
                    const std::string &config_folder) {
+        img_in.convertTo(img_in, -1, 1.1, 2);
         cv::Mat hsv_img;
         cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
 
         cv::Mat blue_mask;
-        cv::inRange(hsv_img, cv::Scalar(100, 120, 150), cv::Scalar(135, 255, 255), blue_mask);
+        cv::inRange(hsv_img, cv::Scalar(100, 110, 50), cv::Scalar(130, 255, 255), blue_mask);
 
         std::vector<std::vector<cv::Point>> contours;
         cv::findContours(blue_mask, contours,
@@ -15,25 +16,27 @@ namespace student {
                          cv::CHAIN_APPROX_SIMPLE);
         cv::drawContours(img_in, contours, -1, cv::Scalar(40, 190, 40), 4, cv::LINE_AA);
 
-        //cv::imwrite(config_folder + "/img_robot.jpg", img_in);
+        cv::imwrite(config_folder + "/img_robot.jpg", img_in);
 
-        //cv::imshow("robot_mask", img_in);
-        //cv::waitKey(20);
+        cv::imshow("robot_mask", blue_mask);
+        cv::waitKey(20);
 
         std::vector<cv::Point> approx_curve;
 
-        for (int i = 0; i <
-                        contours.size(); ++i)    //se per caso il blue mask trova + di 1 figura scelgo sono quella che approssimata ha 3 lati!
+        for (int i = 0; i < contours.size(); ++i)    //se per caso il blue mask trova + di 1 figura scelgo sono quella che approssimata ha 3 lati!
         {
             // Approximate the i-th contours
             cv::approxPolyDP(contours[i], approx_curve, 30, true);
 
+
             // Check the number of edge of the aproximate contour
+
             if (approx_curve.size() == 3) {
                 //std::cout << "triangle (robot) found!:  " << contours[i].size() << std::endl;
                 break;
             }
         }
+
         if (approx_curve.size() == 3) {
             double area = cv::contourArea(approx_curve);
 
