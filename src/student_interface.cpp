@@ -467,7 +467,7 @@ namespace student {
             //Get the dubins curve
             Dubins dub;
 
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 20.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 15.0);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;
