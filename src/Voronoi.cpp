@@ -723,7 +723,7 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         get<2>(shortest_path[i]) = angle;
     }
 
-    
+
 
     print_dot(myg, shortest_path);
     return shortest_path;

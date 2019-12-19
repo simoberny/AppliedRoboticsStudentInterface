@@ -16,7 +16,7 @@ double sinc(double t){
     double s;
 
     if(abs(t) < 0.002){
-        s = 1 - pow(t, 2) * 1/6 * (1 - pow(t, 2)/120);
+        s = 1 - pow(t, 2) * (1/6 - pow(t, 2)/20);
     }else{
         s = sin(t)/t;
     }
