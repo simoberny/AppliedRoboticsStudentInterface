@@ -39,8 +39,8 @@ typedef std::pair<int, int> Edge;
 
 const double threshold_ricerca = 0.01;
 
-const double threshold_angle = 0.35;
-const double threshold_dist = 0.15;
+const double threshold_angle = 0.20;
+const double threshold_dist = 0.14;
 
 static double scale = 500.0;
 
@@ -134,14 +134,14 @@ public:
 
     void calculate(const std::vector<Polygon> &obstacle_list, const Polygon &enlarged_borders, const Polygon &borders,
                    const std::vector<std::pair<int, Polygon>> &victim_list,
-                   const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd);
+                   const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd,double& gate_angle);
 
     cv::Mat draw(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
               const std::vector<std::pair<int, Polygon>> &victim_list,
               const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd,
               const std::vector<std::tuple<int, Voronoi::Point, double> > te);
 
-    std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta);
+    std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta, double& gate_angle);
 };
 
 

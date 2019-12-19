@@ -8,5 +8,5 @@
 
 const double MIN_AREA_SIZE = 100;
 
-int get_victim_number(cv::Rect boundRect, cv::Mat img, const std::string& config_folder);
+int get_victim_number(cv::Rect boundRect, cv::Mat img, cv::Mat &showImage, const std::string& config_folder);
 
