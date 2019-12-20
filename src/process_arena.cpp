@@ -53,8 +53,11 @@ bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, 
     //Real world
     cv::inRange(hsv_img, cv::Scalar(45, 40, 60), cv::Scalar(80, 255, 180), green_mask);
 
+    //cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
+
+
     //Per simulatore
-    //cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
+    cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
 
     cv::imshow("Gate", green_mask);
     cv::waitKey(20);
@@ -103,7 +106,9 @@ bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scal
 
     // Find green regions
     cv::Mat green_mask;
-    cv::inRange(hsv_img, cv::Scalar(40, 40, 70), cv::Scalar(75, 230, 160), green_mask);
+
+    //Per Arena
+    cv::inRange(hsv_img, cv::Scalar(40, 40, 50), cv::Scalar(75, 230, 160), green_mask);
 
     //Per simulatore
     //cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);

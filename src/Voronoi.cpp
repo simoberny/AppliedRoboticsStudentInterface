@@ -97,11 +97,12 @@ distance_line_line(double l1_x1, double l1_y1, double l1_x2, double l1_y2, doubl
 
 void
 compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<std::vector<double>> &triangle_gate, double& gate_angle) {
-    double triangle_length = 0.03;
+
+
+    double triangle_length = 0.05;
     std::pair<double, double> gate_center = calcCentroid(gate);
-    std::vector<double> v1 = {gate_center.first, gate_center.second};
-    triangle_gate.emplace_back(v1);
     double distance = 10000.0;
+
     int index = 0;
     //trova il lato del bordo più vicino a centro del gate....
     for (int i = 0; i < borders.size(); i++) {
@@ -161,9 +162,15 @@ compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<s
         }
     }
 
+    double x_center = (triangle_gate[0][0]+triangle_gate[1][0]+gate_center.first)/3;
+    double y_center = (triangle_gate[0][1]+triangle_gate[1][1]+gate_center.second)/3;
+    std::vector<double> v = {x_center, y_center};
+    triangle_gate.emplace_back(v);
 
-    double a1 = atan2((triangle_gate[1][1] - triangle_gate[0][1]), (triangle_gate[1][0] - triangle_gate[0][0]));
-    double a2 = atan2((triangle_gate[2][1] - triangle_gate[0][1]), (triangle_gate[2][0] - triangle_gate[0][0]));
+
+
+    double a1 = atan2((triangle_gate[1][1] - triangle_gate[2][1]), (triangle_gate[1][0] - triangle_gate[2][0]));
+    double a2 = atan2((triangle_gate[0][1] - triangle_gate[2][1]), (triangle_gate[0][0] - triangle_gate[2][0]));
 
     double meta = 0;
 
@@ -190,13 +197,24 @@ compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<s
 }
 
 
-void compute_triangle_robot(const Polygon &borders, const float x, const float y, const float theta,
+void compute_triangle_robot(const Polygon &borders, const float x, const float y, const float const_theta,
                             std::vector<std::vector<double>> &triangle_robot) {
+
+    float theta = const_theta;
+
+    if(theta <(M_PI/2)+0.4 && theta >(M_PI/2)-0.4){
+        //angolo verticale, la tangente non si può calcolare
+        theta = theta +0.4;
+
+    }else if((-M_PI/2)-0.4 <theta && theta <(-M_PI/2)+0.4){
+        //angolo verticale, la tangente non si può calcolare!
+        theta = theta +0.4;
+    }
+
     //angolo sul robot:
     double pi = 3.14159;
     double m = -tan(theta);
     double delta = 0.03;
-
 
     std::vector<double> v1;
     v1.emplace_back(x);
@@ -210,7 +228,8 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
         double q2 = y - m2 * x;
         std::vector<double> v2 = {x + delta, m1 * (x + delta) + q1};
         std::vector<double> v3 = {x + delta, m2 * (x + delta) + q2};
-        std::cout << "caso1..... m1: " << m1 << " m2: " << m2 << " q1: " << q1 << " q2: " << q2 << " theta: " << theta
+        std::cout << "caso1..... m1: " << m1 << " m2: " << m2 << " q1: " << q1 << " q2: " << q2 << " theta: "
+                  << theta
                   << " tan: " << m << " p1x: " << x + delta << " p1y: " << m1 * (x + delta) + q1 << " p2x: "
                   << x + delta << " p2y: " << m2 * (x + delta) + q2 << std::endl;
         triangle_robot.emplace_back(v2);
@@ -222,12 +241,14 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
         double q2 = y - m2 * x;
         std::vector<double> v2 = {x - delta, m1 * (x - delta) + q1};
         std::vector<double> v3 = {x - delta, m2 * (x - delta) + q2};
-        std::cout << "caso2..... m1: " << m1 << " m2: " << m2 << " q1: " << q1 << " q2: " << q2 << " theta: " << theta
+        std::cout << "caso2..... m1: " << m1 << " m2: " << m2 << " q1: " << q1 << " q2: " << q2 << " theta: "
+                  << theta
                   << " tan: " << m << " p1x: " << x + delta << " p1y: " << m1 * (x + delta) + q1 << " p2x: "
                   << x + delta << " p2y: " << m2 * (x + delta) + q2 << std::endl;
         triangle_robot.emplace_back(v2);
         triangle_robot.emplace_back(v3);
     }
+
 
     std::cout << "Ho trovato triangolo robot!" << std::endl;
 }
@@ -256,12 +277,12 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
     std::vector<std::vector<double>> triangle_gate;
     compute_triangle_gate(borders, gate, triangle_gate, gate_angle);
 
-    segments.push_back(Segment(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale, triangle_gate[1][0] * scale,
+    segments.push_back(Segment(triangle_gate[2][0] * scale, triangle_gate[2][1] * scale, triangle_gate[1][0] * scale,
                                triangle_gate[1][1] * scale));
-    segments.push_back(Segment(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale, triangle_gate[2][0] * scale,
-                               triangle_gate[2][1] * scale));
-    this->gate_center.a = triangle_gate[0][0];
-    this->gate_center.b = triangle_gate[0][1];
+    segments.push_back(Segment(triangle_gate[2][0] * scale, triangle_gate[2][1] * scale, triangle_gate[0][0] * scale,
+                               triangle_gate[0][1] * scale));
+    this->gate_center.a = triangle_gate[2][0];
+    this->gate_center.b = triangle_gate[2][1];
 
     // croce sulle vittime per forzare il diagramma di voronoi a passare sopra
     for (int i = 0; i < victim_list.size(); i++) {
@@ -341,10 +362,10 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
     double gate_angle;
     compute_triangle_gate(borders, gate, triangle_gate, gate_angle);
 
-    cv::line(image, cv::Point(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale),
+    cv::line(image, cv::Point(triangle_gate[2][0] * scale, triangle_gate[2][1] * scale),
              cv::Point(triangle_gate[1][0] * scale, triangle_gate[1][1] * scale), cv::Scalar(0, 87, 205), 2, 1);
-    cv::line(image, cv::Point(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale),
-             cv::Point(triangle_gate[2][0] * scale, triangle_gate[2][1] * scale), cv::Scalar(0, 87, 205), 2, 1);
+    cv::line(image, cv::Point(triangle_gate[2][0] * scale, triangle_gate[2][1] * scale),
+             cv::Point(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale), cv::Scalar(0, 87, 205), 2, 1);
     std::cout << "triangle gate:    x1 " << triangle_gate[0][0] * scale << " y1 " << triangle_gate[0][1] * scale
               << " x2 " << triangle_gate[1][0] * scale << " y2 " << triangle_gate[1][1] * scale << " x3 "
               << triangle_gate[2][0] * scale << " y3 " << triangle_gate[1][0] * scale << std::endl;
@@ -495,17 +516,25 @@ void clean_path_2(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int,
 
         std::cout << "Linestring: (" << path[i-1].first << ") -> (" << path[i+1].first << ")" << std::endl;
 
+        double dist = sqrt(
+                pow(vertex[path[i-1].first].a - vertex[path[i+1].first].a, 2) +
+                pow(vertex[path[i-1].first].b - vertex[path[i+1].first].b, 2));
+
+        std::cout << "Distanza: " << dist << std::endl;
+
         if(is_colliding(merged_obstacles, ls)){
             std::cout << "Is colliding " << path[i].first << std::endl;
             i++;
         }else{
-            if (!path[i].second) {
-                std::cout << "Deleting " << path[i].first << std::endl;
+            if (!path[i].second && dist < max_threshold_dist) {
+                std::cout << "Deleting " << path[i].first << " - Distanza: " << dist << std::endl;
                 path.erase(path.begin() + (i));
             }else{
                 i++;
             }
-        }
+        }  
+
+
     }while(i < path.size() - 1);
 }
 

@@ -414,9 +414,11 @@ namespace student {
         //System to now how much time takes the plan
         auto started = std::chrono::high_resolution_clock::now();
 
+        std::cout << "Dio bello" << std::endl;
+
         //Resize of the arena 
-        Polygon obstacle_border = resizeBorders(borders, 0.04);
-        Polygon voronoi_border = resizeBorders(borders, 0.03);
+        Polygon obstacle_border = resizeBorders(borders, 0.07);
+        Polygon voronoi_border = resizeBorders(borders, 0.06);
 
         //Enlargement of the obstacle
         std::vector<Polygon> englarge_obstacle = enlargeObstacle(obstacle_list, robot_r);
