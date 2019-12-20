@@ -612,7 +612,7 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
 
     double a = meta;
 
-    if(meta > a2){
+    if(meta > a2 && meta < M_PI){
         if(d1 > d2){
             double per = 1- d2/d1;
             a = meta - (angolo_interno(a2,meta) * per);
