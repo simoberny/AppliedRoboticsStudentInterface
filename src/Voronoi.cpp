@@ -47,6 +47,10 @@ Voronoi::Voronoi() {   } // Constructor
 float test_vector[4][4];
 const int matrix_size = 4;
 
+std::vector<std::vector<double>> triangle_gate;
+double gate_angle;
+std::vector<std::vector<double>> triangle_robot;
+
 std::pair<double, double> calcCentroid(const Polygon &p) {
     double max_x = 0, max_y = 0, min_x = 1000, min_y = 1000;
 
@@ -259,11 +263,9 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
 
     std::vector<Point> points;
     std::vector<Segment> segments;
-    //rectangle_gate(borders,gate,triangle_gate);
 
-    std::vector<std::vector<double>> triangle_robot;
     compute_triangle_robot(borders, x, y, theta, triangle_robot);
-
+    //pass the triangle over the robot to force voronoi
     segments.push_back(
             Segment(triangle_robot[0][0] * scale, triangle_robot[0][1] * scale, triangle_robot[1][0] * scale,
                     triangle_robot[1][1] * scale));
@@ -274,8 +276,8 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
     this->robot_center.b = triangle_robot[0][1];
 
 
-    std::vector<std::vector<double>> triangle_gate;
     compute_triangle_gate(borders, gate, triangle_gate, gate_angle);
+    //pass the triangle over the gate to force voronoi
 
     segments.push_back(Segment(triangle_gate[2][0] * scale, triangle_gate[2][1] * scale, triangle_gate[1][0] * scale,
                                triangle_gate[1][1] * scale));
@@ -358,10 +360,8 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
 
     cv::Mat image = cv::Mat::zeros(600, 1000, CV_8UC3);
 
-    std::vector<std::vector<double>> triangle_gate;
-    double gate_angle;
-    compute_triangle_gate(borders, gate, triangle_gate, gate_angle);
 
+    //draw the red triangle over the gate
     cv::line(image, cv::Point(triangle_gate[2][0] * scale, triangle_gate[2][1] * scale),
              cv::Point(triangle_gate[1][0] * scale, triangle_gate[1][1] * scale), cv::Scalar(0, 87, 205), 2, 1);
     cv::line(image, cv::Point(triangle_gate[2][0] * scale, triangle_gate[2][1] * scale),
@@ -370,8 +370,7 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
               << " x2 " << triangle_gate[1][0] * scale << " y2 " << triangle_gate[1][1] * scale << " x3 "
               << triangle_gate[2][0] * scale << " y3 " << triangle_gate[1][0] * scale << std::endl;
 
-    std::vector<std::vector<double>> triangle_robot;
-    compute_triangle_robot(borders, x, y, theta, triangle_robot);
+    //compute the blue triangle over the robot
     cv::line(image, cv::Point(triangle_robot[0][0] * scale, triangle_robot[0][1] * scale),
              cv::Point(triangle_robot[1][0] * scale, triangle_robot[1][1] * scale), cv::Scalar(255, 127, 0), 2, 1);
     cv::line(image, cv::Point(triangle_robot[0][0] * scale, triangle_robot[0][1] * scale),
