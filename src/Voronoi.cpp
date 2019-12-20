@@ -541,23 +541,14 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
 
     double a = meta;
 
-    if(a2 < a1){
-        if(d1 > d2){
-            double per = 1- d2/d1;            
-            a = meta + (angolo_interno(a2,meta) * per);
-        }else if (d2 > d1){
-            double per = d1/d2;
-            a = meta - (angolo_interno(a2,meta) * per);
-        }
-    }else{
-        if(d1 > d2){
-            double per = 1- d2/d1;
-            a = meta - (angolo_interno(a2,meta) * per);
-        }else if (d2 > d1){
-            double per = d1/d2;
-            a = meta + (angolo_interno(a2,meta) * per);
-        }
+    if(d1 > d2){
+        double per = 1- d2/d1;
+        a = meta - (angolo_interno(a2,meta) * per);
+    }else if (d2 > d1){
+        double per = d1/d2;
+        a = meta + (angolo_interno(a2,meta) * per);
     }
+
     a = std::fmod(a, 2*M_PI);
 
     std::cout << "L1: " << d1 << " ; L2:" << d2 << std::endl;

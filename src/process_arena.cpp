@@ -55,10 +55,10 @@ bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, 
     cv::Mat green_mask;
 
     //Real world
-    //cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
+    cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
 
     //Per simulatore
-    cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
+    //cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
 
 
     std::vector<std::vector<cv::Point>> contours, contours_approx;
@@ -106,10 +106,10 @@ bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scal
 
     // Find green regions
     cv::Mat green_mask;
-    //cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
+    cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
 
     //Per simulatore
-    cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
+    //cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
 
 
     std::vector<std::vector<cv::Point>> contours, contours_approx;

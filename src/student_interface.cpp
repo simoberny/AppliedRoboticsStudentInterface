@@ -263,7 +263,7 @@ namespace student {
                 b_y -= resize;
             }
 
-            re_border.emplace_back(Point(b_x, b_y));
+            re_border.push_back(Point(b_x, b_y));
         }
 
         return re_border;
@@ -415,13 +415,14 @@ namespace student {
         auto started = std::chrono::high_resolution_clock::now();
 
         //Resize of the arena 
-        Polygon resized_border = resizeBorders(borders, 0.06);
+        Polygon obstacle_border = resizeBorders(borders, 0.04);
+        Polygon voronoi_border = resizeBorders(borders, 0.03);
 
         //Enlargement of the obstacle
         std::vector<Polygon> englarge_obstacle = enlargeObstacle(obstacle_list, robot_r);
 
         //Merge of the interecating polygon
-        std::vector<Polygon> merged_list = mergePolygon(englarge_obstacle, resized_border);
+        std::vector<Polygon> merged_list = mergePolygon(englarge_obstacle, obstacle_border);
 
         //Initialize voronoi diagram
         voronoi_diagram<double> vd;
@@ -429,13 +430,13 @@ namespace student {
 
         //Calculate the voronoi points
         double gate_angle;
-        v.calculate(merged_list, resized_border, borders, victim_list, gate, x, y, theta, vd, gate_angle);
+        v.calculate(merged_list, voronoi_border, borders, victim_list, gate, x, y, theta, vd, gate_angle);
 
         //Generate the graph
         std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list, theta, gate_angle);
 
         //Draw all the scene
-        cv::Mat image = v.draw(merged_list, resized_border, victim_list, gate, x, y, theta, vd, t);
+        cv::Mat image = v.draw(merged_list, voronoi_border, victim_list, gate, x, y, theta, vd, t);
         cv::imwrite(config_folder + "/img_voronoi.jpg", image);
 
         static double scale = 500.0;
