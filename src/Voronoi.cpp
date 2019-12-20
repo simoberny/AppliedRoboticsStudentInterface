@@ -466,6 +466,49 @@ int get_pos_array(std::vector<Voronoi::Point> v, Voronoi::Point el) {
     return -1;
 }
 
+bool is_colliding(std::vector<Polygon> merged_obstacles, Linestring ls){
+    for(auto &poly : merged_obstacles){
+        PolygonCollision obstacles;
+
+        for (int j = 0; j < poly.size(); j++) {
+            boost::geometry::append(obstacles.outer(), PointCollision(poly[j].x, poly[j].y));
+        }
+
+        std::vector<PointCollision> result;
+        bool ret = boost::geometry::intersection(ls,obstacles,result);
+
+        std::cout << "Dimensione insertezione: " << result.size() << std::endl;
+
+        if(result.size() > 0) return true;
+    }
+
+    return false;
+}
+
+void clean_path_2(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int, bool> > &path, std::vector<Polygon> merged_obstacles){
+    std::cout << "Clean 2 " << std::endl;
+    int i = 1;
+    do{
+        Linestring ls;
+        boost::geometry::append(ls, PointCollision(vertex[path[i-1].first].a, vertex[path[i-1].first].b));
+        boost::geometry::append(ls, PointCollision(vertex[path[i+1].first].a, vertex[path[i+1].first].b));
+
+        std::cout << "Linestring: (" << path[i-1].first << ") -> (" << path[i+1].first << ")" << std::endl;
+
+        if(is_colliding(merged_obstacles, ls)){
+            std::cout << "Is colliding " << path[i].first << std::endl;
+            i++;
+        }else{
+            if (!path[i].second) {
+                std::cout << "Deleting " << path[i].first << std::endl;
+                path.erase(path.begin() + (i));
+            }else{
+                i++;
+            }
+        }
+    }while(i < path.size() - 1);
+}
+
 /**
  * Prune the minimum path deleting the node to close to each other
  * @param vertex array of all vertex
@@ -541,13 +584,25 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
 
     double a = meta;
 
-    if(d1 > d2){
-        double per = 1- d2/d1;
-        a = meta - (angolo_interno(a2,meta) * per);
-    }else if (d2 > d1){
-        double per = d1/d2;
-        a = meta + (angolo_interno(a2,meta) * per);
+    if(meta > a2){
+        if(d1 > d2){
+            double per = 1- d2/d1;
+            a = meta - (angolo_interno(a2,meta) * per);
+        }else if (d2 > d1){
+            double per = d1/d2;
+            a = meta + (angolo_interno(a2,meta) * per);
+        }
+    }else{
+        if(d1 > d2){
+            double per = d2/d1;
+            a = meta + (angolo_interno(a2,meta) * per);
+        }else if (d2 > d1){
+            double per = 1 - d1/d2;
+            a = meta - (angolo_interno(a2,meta) * per);
+        }
     }
+
+
 
     a = std::fmod(a, 2*M_PI);
 
@@ -632,7 +687,7 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
     //Graph struct
     Graph myg;
 
-    // Fill vertex array
+    //  vertex array
     int vertex_id = 0;
     for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
         double x = it->x() / scale;
@@ -644,7 +699,7 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         vertex_id++;
     }
 
-    // Fill the edge array based on previous vertex
+    // edge array based on previous vertex
     for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin(); it != vd.edges().end(); ++it) {
         if ((it->vertex0() != NULL) &&
             (it->vertex1() != NULL)) {  //NOTE: se la retta va all'infinito allora vertex = NULL!!!
@@ -694,11 +749,12 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         pos = victim_pos[i];
     }
 
-    // Last hope to the robot_pos
+    // Last hop to the robot_pos
     path = myg.add_piece_path(robot_pos, pos);
 
-    // Clean the noise and useless point in the graph based on euclidean distance
     clean_path(myg.vertex_map, path);
+    // Clean the noise and useless point in the graph based on euclidean distance
+    clean_path_2(myg.vertex_map, path, merged_obstacles);
     //print_path(myg.vertex_map, path);
 
     // Return shortest path structure

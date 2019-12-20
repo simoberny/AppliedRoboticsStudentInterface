@@ -37,9 +37,13 @@ typedef boost::graph_traits<graph_t>::vertex_descriptor vertex_descriptor;
 typedef boost::graph_traits<graph_t>::edge_descriptor edge_descriptor;
 typedef std::pair<int, int> Edge;
 
+typedef boost::geometry::model::d2::point_xy<double> PointCollision;
+typedef boost::geometry::model::linestring<PointCollision> Linestring;
+typedef boost::geometry::model::polygon<PointCollision> PolygonCollision;
+
 const double threshold_ricerca = 0.01;
 
-const double threshold_angle = 0.20;
+const double threshold_angle = 0.22;
 const double threshold_dist = 0.14;
 
 static double scale = 500.0;

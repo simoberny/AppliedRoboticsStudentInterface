@@ -14,10 +14,6 @@ bool processObstacles(const cv::Mat &img_in, cv::Mat &showImage, const double sc
     cv::inRange(hsv_img, cv::Scalar(160, 50, 40), cv::Scalar(180, 255, 255), red_mask_high);
     cv::addWeighted(red_mask_low, 1.0, red_mask_high, 1.0, 0.0, red_mask);
 
-    cv::imshow("Original", red_mask);
-    cv::waitKey(20);
-
-
     std::vector<std::vector<cv::Point>> contours, contours_approx;
     std::vector<cv::Point> approx_curve;
 
@@ -55,10 +51,13 @@ bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, 
     cv::Mat green_mask;
 
     //Real world
-    cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
+    cv::inRange(hsv_img, cv::Scalar(45, 40, 60), cv::Scalar(80, 255, 180), green_mask);
 
     //Per simulatore
     //cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
+
+    cv::imshow("Gate", green_mask);
+    cv::waitKey(20);
 
 
     std::vector<std::vector<cv::Point>> contours, contours_approx;
@@ -76,8 +75,6 @@ bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, 
 
     for (auto &contour : contours) {
         const double area = cv::contourArea(contour);
-        //std::cout << "AREA " << area << std::endl;
-        //std::cout << "SIZE: " << contours.size() << std::endl;
         for (int i = 5; i < 10; i++) {
             approxPolyDP(contour, approx_curve, i, true);
 
@@ -106,7 +103,7 @@ bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scal
 
     // Find green regions
     cv::Mat green_mask;
-    cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
+    cv::inRange(hsv_img, cv::Scalar(40, 40, 70), cv::Scalar(75, 230, 160), green_mask);
 
     //Per simulatore
     //cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);

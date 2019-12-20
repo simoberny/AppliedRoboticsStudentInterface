@@ -405,7 +405,7 @@ namespace student {
         //cv::imshow("Original", img_in);
         //cv::waitKey(1000);
 
-        return res1 && res2 && res3;
+        return res1 && res2;
     }
 
     bool planPath(const Polygon &borders, const std::vector<Polygon> &obstacle_list,

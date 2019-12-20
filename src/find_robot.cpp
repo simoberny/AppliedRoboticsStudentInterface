@@ -26,7 +26,7 @@ namespace student {
 
         cv::Mat blue_mask;
         //cv::inRange(hsv_img, cv::Scalar(100, 120, 150), cv::Scalar(135, 255, 255), blue_mask);
-        cv::inRange(hsv_img, cv::Scalar(100, 110, 70), cv::Scalar(130, 255, 255), blue_mask);
+        cv::inRange(hsv_img, cv::Scalar(100, 100, 50), cv::Scalar(130, 255, 255), blue_mask);
 
         std::vector<std::vector<cv::Point>> contours;
         cv::findContours(blue_mask, contours,
@@ -57,7 +57,7 @@ namespace student {
 
         double area = cv::contourArea(approx_curve);
 
-        if (approx_curve.size() == 3 && area > 500) {
+        if (approx_curve.size() == 3 && area > 400) {
 /*
             std::cout << "-----Aprox Contour size: " << approx_curve.size() << std::endl;
             std::cout << "Area: " << area << std::endl;
