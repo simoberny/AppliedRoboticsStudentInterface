@@ -19,6 +19,9 @@
 
 #include "include/find_collision.hpp"
 
+#include <fstream>
+using namespace std;
+
 //namespace geom = boost::geometry;
 
 // x pc arena: us,ps robotics robtics
@@ -391,13 +394,38 @@ namespace student {
         cv::cvtColor(img, img_in, cv::COLOR_HSV2BGR);
 
         cv::Mat showImage = img_in.clone();
+ cout<<"sono arrivato";
+        bool arena = true;
+        string string;
+        ifstream infile;
+        infile.open (config_folder + "setup.txt");
+        int l = 0;
+        while(!infile.eof()) // To get you all the lines.
+        {
+            getline(infile,string); // Saves the line in STRING.
+            if (l == 1){
+                if(string.compare("arena"))
+                    arena = true;
+                if(string.compare("Arena"))
+                    arena = true;
+                if(string.compare("simulator"))
+                    arena = false;
+                if(string.compare("Simulator"))
+                    arena = false;
+                cout<<string<<"arena: "<<arena<<std::endl;
+
+            }
+            l++;
+
+        }
+        infile.close();
 
         std::cout << "enter in process map" << std::endl;
         const bool res1 = processObstacles(img_in, showImage, scale, obstacle_list, robot_r);
         if (!res1) std::cout << "processObstacles return false" << std::endl;
-        const bool res2 = processGate(img_in, showImage, scale, gate);
+        const bool res2 = processGate(img_in, showImage, scale, gate, arena);
         if (!res2) std::cout << "processGate return false" << std::endl;
-        const bool res3 = processVictims(img_in, showImage, scale, victim_list, config_folder);
+        const bool res3 = processVictims(img_in, showImage, scale, victim_list, config_folder, arena);
         if (!res3) std::cout << "processVictims return false" << std::endl;
 
         cv::imwrite(config_folder + "/img_obstacle_recognition.jpg",showImage);
@@ -414,7 +442,25 @@ namespace student {
         //System to now how much time takes the plan
         auto started = std::chrono::high_resolution_clock::now();
 
-        std::cout << "Dio bello" << std::endl;
+        int program = 2;
+        int kmax = 15;
+        string string;
+        ifstream infile;
+        infile.open (config_folder+"setup.txt");
+        int l = 0;
+        while(!infile.eof()) // To get you all the lines.
+        {
+            getline(infile,string); // Saves the line in STRING.
+            if (l == 3){
+                program = std::stoi(string);
+            }
+
+            if (l == 5){
+                kmax = std::stoi(string);
+            }
+            l++;
+        }
+        infile.close();
 
         //Resize of the arena 
         Polygon obstacle_border = resizeBorders(borders, 0.07);
@@ -435,7 +481,7 @@ namespace student {
         v.calculate(merged_list, voronoi_border, borders, victim_list, gate, x, y, theta, vd, gate_angle);
 
         //Generate the graph
-        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list, theta, gate_angle);
+        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list, theta, gate_angle, program);
 
         //Draw all the scene
         cv::Mat image = v.draw(merged_list, voronoi_border, victim_list, gate, x, y, theta, vd, t);
@@ -470,7 +516,7 @@ namespace student {
             //Get the dubins curve
             Dubins dub;
 
-            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, 15.0);
+            dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, kmax);
 
             pair<int, curve> ret = dub.shortest_path();
             curve cur = ret.second;

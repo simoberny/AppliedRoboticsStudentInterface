@@ -1,0 +1,6 @@
+# Arena/Simulator
+Arena
+# Type of program: 1. From start to gate 2. Recover in order 3. Recover fast
+2
+# kmax value
+15

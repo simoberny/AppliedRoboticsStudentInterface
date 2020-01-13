@@ -45,7 +45,7 @@ const double threshold_ricerca = 0.01;
 
 const double threshold_angle = 0.22;
 const double threshold_dist = 0.14;
-const double max_threshold_dist = 0.40;
+const double max_threshold_dist = 0.30;
 
 static double scale = 500.0;
 
@@ -111,8 +111,6 @@ public:
             this->d.reserve(boost::num_vertices(this->g));
 
             this->indexmap = boost::get(boost::vertex_index, this->g);  
-
-            //this->shortest_path.clear();
         }
 
         std::vector<std::pair<int, bool> > add_piece_path(int p1, int p2) {
@@ -152,8 +150,11 @@ public:
               const Polygon &gate, const float x, const float y, const float theta, voronoi_diagram<double> &vd,
               const std::vector<std::tuple<int, Voronoi::Point, double> > te);
 
-    std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta, double& gate_angle);
-    std::vector<std::pair<int, bool> > fast_recover(Voronoi::Graph myg, std::vector<Polygon> merged_obstacles);
+    std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta, double& gate_angle, int program);
+    
+    void recover_nothing(Voronoi::Graph &myg, std::vector<std::pair<int, bool> > &fastest_path);
+    void recover_all(Voronoi::Graph &myg, std::vector<std::pair<int, bool> > &recover_path);
+    void fast_recover(Voronoi::Graph &myg, std::vector<std::pair<int, bool> > &recover_path);
 };
 
 

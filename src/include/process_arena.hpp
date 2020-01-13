@@ -7,7 +7,7 @@
 #include <sstream>
 
 bool processObstacles(const cv::Mat& img_in, cv::Mat &showImage, const double scale, std::vector<Polygon>& obstacle_list, int radius);
-bool processGate(const cv::Mat& img_in, cv::Mat &showImage, const double scale, Polygon& gate);
-bool processVictims(const cv::Mat& img_in, cv::Mat &showImage, const double scale, std::vector<std::pair<int,Polygon>>& victim_list, const std::string& config_folder);
+bool processGate(const cv::Mat& img_in, cv::Mat &showImage, const double scale, Polygon& gate, bool arena);
+bool processVictims(const cv::Mat& img_in, cv::Mat &showImage, const double scale, std::vector<std::pair<int,Polygon>>& victim_list, const std::string& config_folder, bool arena);
 
 

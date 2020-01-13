@@ -42,7 +42,7 @@ bool processObstacles(const cv::Mat &img_in, cv::Mat &showImage, const double sc
     return true;
 }
 
-bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, Polygon &gate) {
+bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, Polygon &gate, bool arena ) {
 
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
@@ -50,14 +50,14 @@ bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, 
     // Find purple regions
     cv::Mat green_mask;
 
-    //Real world
-    cv::inRange(hsv_img, cv::Scalar(45, 40, 60), cv::Scalar(80, 255, 180), green_mask);
 
-    //cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
-
-
-    //Per simulatore
-    cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
+    if(!arena) {
+        //Per simulatore
+        cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
+    }else{
+        //arena
+        cv::inRange(hsv_img, cv::Scalar(45, 40, 60), cv::Scalar(80, 255, 180), green_mask);
+    }
 
     cv::imshow("Gate", green_mask);
     cv::waitKey(20);
@@ -98,7 +98,7 @@ bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, 
 }
 
 bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scale, std::vector<std::pair<int, Polygon>> &victim_list,
-                    const std::string &config_folder) {
+                    const std::string &config_folder, bool arena) {
 
     //TODO: ATTENZIONE se 2 vittime sono sovrposte le trova come un unico blocco
     cv::Mat hsv_img;
@@ -107,12 +107,13 @@ bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scal
     // Find green regions
     cv::Mat green_mask;
 
-    //Per Arena
-    cv::inRange(hsv_img, cv::Scalar(40, 40, 50), cv::Scalar(75, 230, 160), green_mask);
-
-    //Per simulatore
-    //cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
-
+    if(!arena) {
+        //Per simulatore
+        cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
+    }else{
+        //arena
+        cv::inRange(hsv_img, cv::Scalar(40, 40, 50), cv::Scalar(75, 230, 160), green_mask);
+    }
 
     std::vector<std::vector<cv::Point>> contours, contours_approx;
     std::vector<cv::Point> approx_curve;

@@ -5,7 +5,7 @@ cmake-build-debug/
 .vscode/
 CMakeFiles/
 
-config_folder/
+config_folder/extrinsicCalib.csv
 
 # Prerequisites
 *.d
