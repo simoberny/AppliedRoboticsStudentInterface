@@ -771,12 +771,12 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
     // Compute minimum path in piece through djjkstra reverse flow
     std::vector<std::pair<int, bool> > path;
     int pos = gate_pos;
-
+/*
     for (int i = 0; i < victim_pos.size(); i++) {
         path = myg.add_piece_path(victim_pos[i], pos);
         pos = victim_pos[i];
     }
-
+*/
     // Last hop to the robot_pos
     path = myg.add_piece_path(robot_pos, pos);
 
