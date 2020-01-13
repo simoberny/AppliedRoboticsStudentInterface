@@ -706,6 +706,60 @@ bool compare_victim_number(std::pair<int, Voronoi::Point> v1, std::pair<int, Vor
     return (v1.first > v2.first);
 }
 
+
+std::vector<std::pair<int, bool> > Voronoi::fast_recover(Voronoi::Graph myg, std::vector<Polygon> merged_obstacles){
+    // Compute Graph
+    int num_nodes = myg.getVertexSize();
+    myg.createGraph();
+
+    int robot_pos = get_pos_array(myg.vertex_map, this->robot_center);
+    int gate_pos = get_pos_array(myg.vertex_map, this->gate_center);
+
+    // Compute minimum path in piece through djjkstra reverse flow
+    int pos = gate_pos;
+    std::vector<std::pair<int, bool> > fastest_path = myg.add_piece_path(robot_pos, pos);
+    clean_path(myg.vertex_map, fastest_path);
+
+
+    myg.clear_path();
+
+    std::vector<std::pair<int, bool> > recover_path;
+    std::vector<int> victim_added;
+
+    // Last hop to the robot_po
+    for (int i = 0; i < fastest_path.size() - 1; i++) {
+        double x1 = myg.vertex_map[fastest_path[i].first].a;
+        double y1 = myg.vertex_map[fastest_path[i].first].b;
+        double x2 = myg.vertex_map[fastest_path[i+1].first].a;
+        double y2 = myg.vertex_map[fastest_path[i+1].first].b;
+
+        for (int a = 0; a < this->victims_center.size(); a++) {
+            
+            if (std::find(victim_added.begin(), victim_added.end(), this->victims_center[a].first) == victim_added.end()){
+                
+                double d = distance_line_point(x1, y1, x2, y2, this->victims_center[a].second.a, this->victims_center[a].second.b);
+                std::cout << "Distance victim path: " << d << std::endl;
+
+                if(d < 0.15){
+                    int victim_node_pos = get_pos_array(myg.vertex_map, this->victims_center[a].second);
+
+                    recover_path = myg.add_piece_path(victim_node_pos, pos);
+                    pos = victim_node_pos;
+
+                    victim_added.emplace_back(this->victims_center[a].first);
+                }
+            }
+        }
+    }
+
+    recover_path = myg.add_piece_path(robot_pos, pos);
+
+    clean_path(myg.vertex_map, recover_path);
+    clean_path_2(myg.vertex_map, recover_path, merged_obstacles);
+
+    return recover_path;
+}
+
 /**
  * Generate graph from voronoi points and calculate the minimum path from robot to gate through the victims
  * @param vd Voronoi diagram
@@ -764,26 +818,28 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         victim_pos.emplace_back(get_pos_array(myg.vertex_map, this->victims_center[i].second));
 
 
+    std::vector<std::pair<int, bool> > path = fast_recover(myg, merged_obstacles);
+
     // Compute Graph
-    int num_nodes = myg.getVertexSize();
+    /*int num_nodes = myg.getVertexSize();
     myg.createGraph();
 
     // Compute minimum path in piece through djjkstra reverse flow
     std::vector<std::pair<int, bool> > path;
     int pos = gate_pos;
-/*
-    for (int i = 0; i < victim_pos.size(); i++) {
+
+    /*for (int i = 0; i < victim_pos.size(); i++) {
         path = myg.add_piece_path(victim_pos[i], pos);
         pos = victim_pos[i];
     }
-*/
+
     // Last hop to the robot_pos
     path = myg.add_piece_path(robot_pos, pos);
 
     clean_path(myg.vertex_map, path);
     // Clean the noise and useless point in the graph based on euclidean distance
     clean_path_2(myg.vertex_map, path, merged_obstacles);
-    //print_path(myg.vertex_map, path);
+    //print_path(myg.vertex_map, path);*/
 
     // Return shortest path structure
     std::vector<std::tuple<int, Voronoi::Point, double> > shortest_path;

@@ -90,6 +90,10 @@ public:
             return vertex_map.size();
         }
 
+        void clear_path(){
+            this->shortest_path.clear();
+        }
+
         void createGraph() {
             double arr[this->weights.size()];
             std::copy(this->weights.begin(), this->weights.end(), arr);
@@ -106,7 +110,9 @@ public:
             this->p.reserve(boost::num_vertices(this->g));
             this->d.reserve(boost::num_vertices(this->g));
 
-            this->indexmap = boost::get(boost::vertex_index, this->g);
+            this->indexmap = boost::get(boost::vertex_index, this->g);  
+
+            //this->shortest_path.clear();
         }
 
         std::vector<std::pair<int, bool> > add_piece_path(int p1, int p2) {
@@ -147,6 +153,7 @@ public:
               const std::vector<std::tuple<int, Voronoi::Point, double> > te);
 
     std::vector<std::tuple<int, Voronoi::Point, double> > graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta, double& gate_angle);
+    std::vector<std::pair<int, bool> > fast_recover(Voronoi::Graph myg, std::vector<Polygon> merged_obstacles);
 };
 
 
