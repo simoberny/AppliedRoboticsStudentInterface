@@ -73,6 +73,9 @@ public:
     int robot_pos = 0;
     int gate_pos = 0;
 
+    /**
+     * Graph structure to compute the Djistra minimal path
+     */
     struct Graph {
         std::vector<std::pair<int, bool> > shortest_path;
 
@@ -97,6 +100,11 @@ public:
             this->shortest_path.clear();
         }
 
+        /**
+         * Initialization function
+         * @param vd complete voronoi graph
+         * @param merged_obstacles obstacle list
+         */
         void createGraph(voronoi_diagram<double> &vd, std::vector<Polygon> &merged_obstacles) {
             // Vertex array
             int vertex_id = 0;
@@ -134,7 +142,6 @@ public:
             }
 
             //Initialize structure
-
             double arr[this->weights.size()];
             std::copy(this->weights.begin(), this->weights.end(), arr);
 
@@ -153,6 +160,12 @@ public:
             this->indexmap = boost::get(boost::vertex_index, this->g);  
         }
 
+        /**
+         * Compute the minimal path between to graph point
+         * @param p1 point numbered one
+         * @param p2 point numbered two
+         * @return points path
+         */
         std::vector<std::pair<int, bool> > add_piece_path(int p1, int p2) {
             vertex_descriptor s = boost::vertex(p1, this->g);
 

@@ -2,9 +2,6 @@
 #include "include/find_victim.hpp"
 #include "include/clipper.hpp"
 
-
-//TODO: x ottimizzare la conversion in hsv potrebbe essere fatta 1 solo vaolta!
-
 bool processObstacles(const cv::Mat &img_in, cv::Mat &showImage, const double scale, std::vector<Polygon> &obstacle_list, int radius) {
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
@@ -35,6 +32,7 @@ bool processObstacles(const cv::Mat &img_in, cv::Mat &showImage, const double sc
         drawContours(showImage, contours_approx, -1, cv::Scalar(255, 0, 0), 3, cv::LINE_AA);
         //std::cout << "   Approximated contour size: " << approx_curve.size() << std::endl;
     }
+
     //std::cout << std::endl;
     //cv::imshow("Original", hsv_img);
     //cv::waitKey(20);
@@ -43,25 +41,20 @@ bool processObstacles(const cv::Mat &img_in, cv::Mat &showImage, const double sc
 }
 
 bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, Polygon &gate, bool arena ) {
-
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
 
     // Find purple regions
     cv::Mat green_mask;
 
-
-    if(!arena) {
-        //Per simulatore
+    if(!arena) { //Per simulatore
         cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
-    }else{
-        //arena
+    }else{ //Arena
         cv::inRange(hsv_img, cv::Scalar(45, 40, 60), cv::Scalar(80, 255, 180), green_mask);
     }
 
     cv::imshow("Gate", green_mask);
     cv::waitKey(20);
-
 
     std::vector<std::vector<cv::Point>> contours, contours_approx;
     std::vector<cv::Point> approx_curve;
@@ -72,7 +65,6 @@ bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, 
     cv::findContours(green_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     //drawContours(contours_img, contours, -1, cv::Scalar(40,190,40), 4, cv::LINE_AA);
     // std::cout << "N. contours: " << contours.size() << std::endl;
-
 
     bool res = false;
 
@@ -99,19 +91,15 @@ bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, 
 
 bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scale, std::vector<std::pair<int, Polygon>> &victim_list,
                     const std::string &config_folder, bool arena) {
-
-    //TODO: ATTENZIONE se 2 vittime sono sovrposte le trova come un unico blocco
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
 
     // Find green regions
     cv::Mat green_mask;
 
-    if(!arena) {
-        //Per simulatore
+    if(!arena) { // Per simulatore
         cv::inRange(hsv_img, cv::Scalar(45, 50, 50), cv::Scalar(75, 255, 255), green_mask);
-    }else{
-        //arena
+    }else{ // Arena
         cv::inRange(hsv_img, cv::Scalar(40, 40, 50), cv::Scalar(75, 230, 160), green_mask);
     }
 
@@ -123,7 +111,6 @@ bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scal
     //std::cout << "N. contours: " << contours.size() << std::endl;
 
     for (int i = 0; i < contours.size(); ++i) {
-        //std::cout << (i+1) << ") Contour size: " << contours[i].size() << std::endl;
         approxPolyDP(contours[i], approx_curve, 3, true);
 
         if (approx_curve.size() > 10) {
@@ -143,6 +130,5 @@ bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scal
             //std::cout << "   Approximated contour size: " << approx_curve.size() << std::endl;
         }
     }
-
     return true;
 }

@@ -486,214 +486,6 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
 using namespace boost;
 
 /**
- * Return the vertex position given a point (coordinates) element
- * @param v Array of vertex index
- * @param el element to find
- * @return position index
- */
-
-int Voronoi::get_pos_array(std::vector<Voronoi::Point> v, Voronoi::Point el) {
-    for (int i = 0; i < v.size(); i++) {
-        if ((fabs(el.a - v[i].a) < threshold_ricerca) && (fabs(el.b - v[i].b) < threshold_ricerca)) return i;
-    }
-
-    return -1;
-}
-
-bool is_colliding(std::vector<Polygon> merged_obstacles, Linestring ls){
-    for(auto &poly : merged_obstacles){
-        PolygonCollision obstacles;
-
-        for (int j = 0; j < poly.size(); j++) {
-            boost::geometry::append(obstacles.outer(), PointCollision(poly[j].x, poly[j].y));
-        }
-
-        std::vector<PointCollision> result;
-        bool ret = boost::geometry::intersection(ls,obstacles,result);
-
-        std::cout << "Dimensione insertezione: " << result.size() << std::endl;
-
-        if(result.size() > 0) return true;
-    }
-
-    return false;
-}
-
-void clean_path_2(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int, bool> > &path, std::vector<Polygon> merged_obstacles){
-    std::cout << "Clean 2 " << std::endl;
-    int i = 1;
-    do{
-        Linestring ls;
-        boost::geometry::append(ls, PointCollision(vertex[path[i-1].first].a, vertex[path[i-1].first].b));
-        boost::geometry::append(ls, PointCollision(vertex[path[i+1].first].a, vertex[path[i+1].first].b));
-
-        std::cout << "Linestring: (" << path[i-1].first << ") -> (" << path[i+1].first << ")" << std::endl;
-
-        double dist = sqrt(
-                pow(vertex[path[i-1].first].a - vertex[path[i+1].first].a, 2) +
-                pow(vertex[path[i-1].first].b - vertex[path[i+1].first].b, 2));
-
-        std::cout << "Distanza: " << dist << std::endl;
-
-        if(is_colliding(merged_obstacles, ls)){
-            std::cout << "Is colliding " << path[i].first << std::endl;
-            i++;
-        }else{
-            if (!path[i].second && dist < max_threshold_dist) {
-                std::cout << "Deleting " << path[i].first << " - Distanza: " << dist << std::endl;
-                path.erase(path.begin() + (i));
-            }else{
-                i++;
-            }
-        }  
-
-
-    }while(i < path.size() - 1);
-}
-
-/**
- * Prune the minimum path deleting the node to close to each other
- * @param vertex array of all vertex
- * @param path Minimum path
- */
-void clean_path(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int, bool> > &path) {
-    std::cout << "Elimino: ";
-    for (int i = path.size() - 1; i > 0; i--) {
-        //Prune dell'albero
-        double dist = sqrt(
-                pow(vertex[path[i].first].a - vertex[path[i - 1].first].a, 2) +
-                pow(vertex[path[i].first].b - vertex[path[i - 1].first].b, 2));
-
-        if (dist < threshold_dist) {
-            if (!path[i - 1].second) {
-                std::cout << path[i - 1].first << ",";
-                path.erase(path.begin() + (i - 1));
-            }else{
-                if(!path[i].second){
-                    std::cout << path[i].first << ",";
-                    path.erase(path.begin() + (i));
-                }
-            }
-        }
-    }
-    std::cout << std::endl;
-}
-
-double angolo_interno(double angle1, double meta){
-    if(angle1-meta >=0 && angle1-meta < M_PI)
-        return angle1-meta;
-    else if(angle1-meta <0 && meta-angle1 < M_PI)
-        return meta-angle1;
-    else if(angle1-meta >=0 && angle1-meta > M_PI)
-        return 2*M_PI-(angle1-meta);
-    else if(angle1-meta <0 && meta-angle1 > M_PI)
-        return 2*M_PI-(meta-angle1);
-    return meta;
-}
-
-/**
- * Get the approach angle of a point
- */
-double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point third) {
-    double d1 = sqrt(
-            pow(second.a - first.a, 2) +
-            pow(second.b - first.b, 2));
-
-    double d2 = sqrt(
-            pow(third.a - second.a, 2) +
-            pow(third.b - second.b, 2));
-
-    double a1 = atan2((first.b - second.b), (first.a - second.a));
-    double a2 = atan2((third.b - second.b), (third.a - second.a));
-
-    double meta = 0;
-
-    if(a1<0){
-        a1 = 2*M_PI+a1;
-    }
-    if(a2<0){
-        a2 = 2*M_PI+a2;
-    }
-
-    if(a1 < a2){
-        meta = std::fmod((((a1+a2)/2) + M_PI/2), 2*M_PI);
-    }else{
-        meta = std::fmod((((a1+a2)/2) - M_PI/2), 2*M_PI);
-    }
-    if(meta<0){
-        meta = 2*M_PI+meta;
-    }
-
-    double a = meta;
-
-    double per = (d1 > d2) ? 1 - d2/d1 : 1 - d1/d2;
-
-    double a_minus = std::fmod(meta - (angolo_interno(a2,meta) * per), 2*M_PI);
-    double a_plus = std::fmod(meta + (angolo_interno(a2,meta) * per), 2*M_PI);
-
-    double angle_a1_minus = angolo_interno(a2,a_minus);
-    double angle_a1_plus = angolo_interno(a2,a_plus);
-
-    if(d1 > d2){
-        if(angle_a1_plus > angle_a1_minus){
-            a = a_minus;
-        }else{
-            a = a_plus;
-        }
-    }else if (d2 > d1){
-        if(angle_a1_plus > angle_a1_minus){
-            a = a_plus;
-        }else{
-            a = a_minus;
-        }
-    }
-
-    /*if(meta > a2 && meta < M_PI){
-        if(d1 > d2){
-            double per = 1- d2/d1;
-            a = meta - (angolo_interno(a2,meta) * per);
-        }else if (d2 > d1){
-            double per = d1/d2;
-            a = meta + (angolo_interno(a2,meta) * per);
-        }
-    }else{
-        if(d1 > d2){
-            double per = d2/d1;
-            a = meta + (angolo_interno(a2,meta) * per);
-        }else if (d2 > d1){
-            double per = 1 - d1/d2;
-            a = meta - (angolo_interno(a2,meta) * per);
-        }
-    }*/
-
-
-
-    a = std::fmod(a, 2*M_PI);
-
-    std::cout << "L1: " << d1 << " ; L2:" << d2 << std::endl;
-    std::cout << "A1: " << a1 << " ; A2:" << a2  << "; Angolo metà:"  << meta << "; Angolo di approccio: " << a << std::endl;
-    std::cout << std::endl;
-
-    return a;
-}
-
-/**
- * Boolean function to find the pairs of segments with enough angle to be considered
- * @param first Point
- * @param second Point
- * @param third Point
- * @return true if the two segment as a difference angle higher than a thresh
- */
-bool coeff_higher(Voronoi::Point first, Voronoi::Point second, Voronoi::Point third) {
-    double m1 = atan2((second.b - first.b), (second.a - first.a));
-    double m2 = atan2((third.b - second.b), (third.a - second.a));
-
-    double diff = fabs(m2 - m1);
-
-    return diff > threshold_angle;
-}
-
-/**
  * Print the minimum path
  */
 void print_path(std::vector<Voronoi::Point> vertex, std::vector<int> &path) {
@@ -736,13 +528,197 @@ void print_dot(Voronoi::Graph myg, std::vector<std::tuple<int, Voronoi::Point, d
 }
 
 /**
+ * Return the vertex position given a point (coordinates) element
+ * @param v Array of vertex index
+ * @param el element to find
+ * @return position index
+ */
+
+int Voronoi::get_pos_array(std::vector<Voronoi::Point> v, Voronoi::Point el) {
+    for (int i = 0; i < v.size(); i++) {
+        if ((fabs(el.a - v[i].a) < threshold_ricerca) && (fabs(el.b - v[i].b) < threshold_ricerca)) return i;
+    }
+
+    return -1;
+}
+
+bool is_colliding(std::vector<Polygon> merged_obstacles, Linestring ls){
+    for(auto &poly : merged_obstacles){
+        PolygonCollision obstacles;
+
+        for (int j = 0; j < poly.size(); j++) {
+            boost::geometry::append(obstacles.outer(), PointCollision(poly[j].x, poly[j].y));
+        }
+
+        std::vector<PointCollision> result;
+        bool ret = boost::geometry::intersection(ls,obstacles,result);
+
+        //std::cout << "Dimensione insertezione: " << result.size() << std::endl;
+
+        if(result.size() > 0) return true;
+    }
+
+    return false;
+}
+
+void clean_path_2(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int, bool> > &path, std::vector<Polygon> merged_obstacles){
+    int i = 1;
+    do{
+        Linestring ls;
+        boost::geometry::append(ls, PointCollision(vertex[path[i-1].first].a, vertex[path[i-1].first].b));
+        boost::geometry::append(ls, PointCollision(vertex[path[i+1].first].a, vertex[path[i+1].first].b));
+
+        double dist = sqrt(
+                pow(vertex[path[i-1].first].a - vertex[path[i+1].first].a, 2) +
+                pow(vertex[path[i-1].first].b - vertex[path[i+1].first].b, 2));
+
+        if(is_colliding(merged_obstacles, ls)){
+            //std::cout << "Is colliding " << path[i].first << std::endl;
+            i++;
+        }else{
+            if (!path[i].second && dist < max_threshold_dist) {
+                path.erase(path.begin() + (i));
+            }else{
+                i++;
+            }
+        }
+    }while(i < path.size() - 1);
+}
+
+/**
+ * Prune the minimum path deleting the node to close to each other
+ * @param vertex array of all vertex
+ * @param path Minimum path
+ */
+void clean_path(std::vector<Voronoi::Point> vertex, std::vector<std::pair<int, bool> > &path) {
+    for (int i = path.size() - 1; i > 0; i--) {
+        //Prune dell'albero
+        double dist = sqrt(
+                pow(vertex[path[i].first].a - vertex[path[i - 1].first].a, 2) +
+                pow(vertex[path[i].first].b - vertex[path[i - 1].first].b, 2));
+
+        if (dist < threshold_dist) {
+            if (!path[i - 1].second) {
+                path.erase(path.begin() + (i - 1));
+            }else{
+                if(!path[i].second){
+                    path.erase(path.begin() + (i));
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Get the internal angle between two vector angle
+ */
+double angolo_interno(double angle1, double meta){
+    if(angle1-meta >=0 && angle1-meta < M_PI)
+        return angle1-meta;
+    else if(angle1-meta <0 && meta-angle1 < M_PI)
+        return meta-angle1;
+    else if(angle1-meta >=0 && angle1-meta > M_PI)
+        return 2*M_PI-(angle1-meta);
+    else if(angle1-meta <0 && meta-angle1 > M_PI)
+        return 2*M_PI-(meta-angle1);
+    return meta;
+}
+
+/**
+ * Get the approach angle of a point
+ */
+double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point third) {
+    double d1 = sqrt(
+            pow(second.a - first.a, 2) +
+            pow(second.b - first.b, 2));
+
+    double d2 = sqrt(
+            pow(third.a - second.a, 2) +
+            pow(third.b - second.b, 2));
+
+    double a1 = atan2((first.b - second.b), (first.a - second.a));
+    double a2 = atan2((third.b - second.b), (third.a - second.a));
+
+    double meta = 0;
+
+    if(a1<0){
+        a1 = 2*M_PI+a1;
+    }
+    if(a2<0){
+        a2 = 2*M_PI+a2;
+    }
+
+    if(a1 < a2){
+        meta = std::fmod((((a1+a2)/2) + M_PI/2), 2*M_PI);
+    }else{
+        meta = std::fmod((((a1+a2)/2) - M_PI/2), 2*M_PI);
+    }
+
+    if(meta<0)
+        meta = 2*M_PI+meta;
+
+    double a = meta;
+    double per = (d1 > d2) ? 1 - d2/d1 : 1 - d1/d2;
+
+    // Compute the two possible line enhancing the angle in the two side
+    double a_minus = std::fmod(meta - (angolo_interno(a2,meta) * per), 2*M_PI);
+    double a_plus = std::fmod(meta + (angolo_interno(a2,meta) * per), 2*M_PI);
+
+    // Compute the internal angle based on the previous value
+    double angle_a1_minus = angolo_interno(a2,a_minus);
+    double angle_a1_plus = angolo_interno(a2,a_plus);
+
+    if(d1 > d2){
+        if(angle_a1_plus > angle_a1_minus){
+            a = a_minus;
+        }else{
+            a = a_plus;
+        }
+    }else if (d2 > d1){
+        if(angle_a1_plus > angle_a1_minus){
+            a = a_plus;
+        }else{
+            a = a_minus;
+        }
+    }
+
+    a = std::fmod(a, 2*M_PI);
+
+    std::cout << "L1: " << d1 << " ; L2:" << d2 << std::endl;
+    std::cout << "A1: " << a1 << " ; A2:" << a2  << "; Angolo metà:"  << meta << "; Angolo di approccio: " << a << std::endl;
+    std::cout << std::endl;
+
+    return a;
+}
+
+/**
+ * Boolean function to find the pairs of segments with enough angle to be considered
+ * @param first Point
+ * @param second Point
+ * @param third Point
+ * @return true if the two segment as a difference angle higher than a thresh
+ */
+bool coeff_higher(Voronoi::Point first, Voronoi::Point second, Voronoi::Point third) {
+    double m1 = atan2((second.b - first.b), (second.a - first.a));
+    double m2 = atan2((third.b - second.b), (third.a - second.a));
+
+    double diff = fabs(m2 - m1);
+
+    return diff > threshold_angle;
+}
+
+/**
  * Comparator for victim number
  */
 bool compare_victim_number(std::pair<int, Voronoi::Point> v1, std::pair<int, Voronoi::Point> v2) {
     return (v1.first > v2.first);
 }
 
-
+/**
+ * Main mission that save all the victim in numeric order
+ * @param myg
+ * @param recover_path
+ */
 void Voronoi::recover_all(Graph &myg, std::vector<std::pair<int, bool>> &recover_path){
     // Compute minimum path in piece through djjkstra reverse flow
     int pos = this->gate_pos;
@@ -757,11 +733,21 @@ void Voronoi::recover_all(Graph &myg, std::vector<std::pair<int, bool>> &recover
     recover_path = myg.add_piece_path(this->robot_pos, pos);
 }
 
+/**
+ * Mission that go from robot position to gate without saving any victims
+ * @param myg
+ * @param fastest_path
+ */
 void Voronoi::recover_nothing(Graph &myg, std::vector<std::pair<int, bool>> &fastest_path){
     // Compute minimum path in piece through djjkstra reverse flow
     fastest_path = myg.add_piece_path(this->robot_pos, this->gate_pos);
 }
 
+/**
+ * Mission that take the fastest path and check if there are near victim that could be save without losing to much time
+ * @param myg Graph
+ * @param recover_path Returning path
+ */
 void Voronoi::fast_recover(Graph &myg, std::vector<std::pair<int, bool>> &recover_path){
     // Compute minimum path in piece through djjkstra reverse flow
     int pos = this->gate_pos;
@@ -782,11 +768,9 @@ void Voronoi::fast_recover(Graph &myg, std::vector<std::pair<int, bool>> &recove
         for (int a = 0; a < this->victims_center.size(); a++) {
             
             if (std::find(victim_added.begin(), victim_added.end(), this->victims_center[a].first) == victim_added.end()){
-                
                 double d = distance_line_point(x1, y1, x2, y2, this->victims_center[a].second.a, this->victims_center[a].second.b);
-                //std::cout << "Distance victim path: " << d << std::endl;
 
-                if(d < 0.18){
+                if(d < 0.18){ // 18cm
                     int victim_node_pos = get_pos_array(myg.vertex_map, this->victims_center[a].second);
 
                     recover_path = myg.add_piece_path(victim_node_pos, pos);
@@ -809,26 +793,27 @@ void Voronoi::fast_recover(Graph &myg, std::vector<std::pair<int, bool>> &recove
 std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta, double& gate_angle, int program, std::vector<Polygon> clean_obstacles) {
     //Graph struct
     Graph myg;
-        // Compute Graph
+    // Initialize graph
     myg.createGraph(vd, merged_obstacles);
 
     // Get key position based on vertex pos
     this->robot_pos = get_pos_array(myg.vertex_map, this->robot_center);
     this->gate_pos = get_pos_array(myg.vertex_map, this->gate_center);
 
-    std::vector<int> victim_pos;
-
     // Sort the victim based on number recognition
     sort(this->victims_center.begin(), this->victims_center.end(), compare_victim_number);
 
     // Get index of victims vertex
+    std::vector<int> victim_pos;
+
     for (int i = 0; i < this->victims_center.size(); i++)
         victim_pos.emplace_back(get_pos_array(myg.vertex_map, this->victims_center[i].second));
 
     std::vector<std::pair<int, bool> > path;
 
+    // Compute robot mission based on the configuration
     switch(program){
-        case 1: 
+        case 1:
             recover_nothing(myg, path);
             break;
         case 2:
@@ -841,6 +826,7 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
             recover_all(myg, path);
     }
 
+    // Graph pruning in two level of depth
     clean_path(myg.vertex_map, path);
     clean_path_2(myg.vertex_map, path, clean_obstacles);
 
@@ -875,14 +861,13 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
         }
     }
 
-    // After pruning, i compute the real angle of approach minus first and last node
+    // After pruning, I compute the real angle of approach minus first and last node
     for(int i = 1; i < shortest_path.size() - 1; i++){
         std::cout << "Archi: " << get<0>(shortest_path[i-1]) << " ->" << get<0>(shortest_path[i]) << "->" << get<0>(shortest_path[i+1]) << std::endl;
 
         // Calculate the angle difference between the two segment
         double angle = get_angle(get<1>(shortest_path[i-1]), get<1>(shortest_path[i]),
                                  get<1>(shortest_path[i+1]));
-
 
         get<2>(shortest_path[i]) = angle;
     }

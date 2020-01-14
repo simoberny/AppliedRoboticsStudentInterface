@@ -263,7 +263,7 @@ pair<int, curve> Dubins::shortest_path () {
         { 1, 0,-1 }, //LSR
         {-1, 0, 1 }, //RSL
         {-1, 1,-1 }, //RLR
-        { 1,-1, 1 } //LRL
+        { 1,-1, 1 }  //LRL
     };
 
     double L = INFINITY;
@@ -275,18 +275,14 @@ pair<int, curve> Dubins::shortest_path () {
         tie(ok, sc_s1_c, sc_s2_c, sc_s3_c) = primitives[i](sc_th0, sc_thf, sc_Kmax);
         double Lcur = sc_s1_c + sc_s2_c + sc_s3_c;
 
-        //cout << endl << f_name[i] << endl;
-
         double s1, s2, s3;
         tie(s1, s2, s3) = scaleFromStandard(lambda, sc_s1_c, sc_s2_c, sc_s3_c);
 
         curve tempcur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[i][0]*kmax, ksigns[i][1]*kmax, ksigns[i][2]*kmax);       
-        //cout << "L: " << tempcur.L << " \n s1: " << s1 << " \n s2: " << s2 << " \n s3: " << s3 << endl;
-
 
         if(ok && Lcur < L){
             L = Lcur;
-            sc_s1 = sc_s1_c; 
+            sc_s1 = sc_s1_c;
             sc_s2 = sc_s2_c;
             sc_s3 = sc_s3_c;
 
@@ -301,8 +297,6 @@ pair<int, curve> Dubins::shortest_path () {
         tie(s1, s2, s3) = scaleFromStandard(lambda, sc_s1, sc_s2, sc_s3);
 
         cur = dubinscurve(x0, y0, th0, s1, s2, s3, ksigns[pidx][0]*kmax, ksigns[pidx][1]*kmax, ksigns[pidx][2]*kmax);
-        
-        // Assertion  
     }else{
         cout << "PIDX < 0" << endl;
     }

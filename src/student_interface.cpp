@@ -22,16 +22,7 @@
 #include <fstream>
 using namespace std;
 
-//namespace geom = boost::geometry;
-
-// x pc arena: us,ps robotics robtics
-//ar_lanch
-//altro t: source environment, lancia pipeline
-
-
-
 namespace student {
-
     //Robot radius (to enlarge obstacles)
     int robot_r = 65;
     //enlarged border raius
@@ -45,8 +36,6 @@ namespace student {
         cv::imshow(topic, img_in);
         c = cv::waitKey(30);
 
-
-        //std::cin >> c;
         if (c == 's') {
             cv::imwrite(config_folder + "/img_" + std::to_string(student::image_index) + ".jpg", img_in);
             std::cout << "Saved!" << std::endl;
@@ -105,7 +94,6 @@ namespace student {
 
     bool extrinsicCalib(const cv::Mat &img_in, std::vector<cv::Point3f> object_points, const cv::Mat &camera_matrix,
                         cv::Mat &rvec, cv::Mat &tvec, const std::string &config_folder) {
-
         std::string file_path = config_folder + "/extrinsicCalib.csv";
 
         std::vector<cv::Point2f> image_points;
@@ -115,11 +103,7 @@ namespace student {
             std::experimental::filesystem::create_directories(config_folder);
 
             image_points = pickNPoints(4, img_in);
-            // SAVE POINT TO FILE
-            // std::cout << "IMAGE POINTS: " << std::endl;
-            // for (const auto pt: image_points) {
-            //   std::cout << pt << std::endl;
-            // }
+
             std::ofstream output(file_path);
             if (!output.is_open()) {
                 throw std::runtime_error("Cannot write file: " + file_path);
@@ -151,21 +135,14 @@ namespace student {
         dist_coeffs = (cv::Mat1d(1, 4) << 0, 0, 0, 0, 0);
         bool ok = cv::solvePnP(object_points, image_points, camera_matrix, dist_coeffs, rvec, tvec);
 
-        // cv::Mat Rt;
-        // cv::Rodrigues(rvec_, Rt);
-        // auto R = Rt.t();
-        // auto pos = -R * tvec_;
-
-        if (!ok) {
+        if (!ok)
             std::cerr << "FAILED SOLVE_PNP" << std::endl;
-        }
 
         return ok;
     }
 
     void imageUndistort(const cv::Mat &img_in, cv::Mat &img_out,
                         const cv::Mat &cam_matrix, const cv::Mat &dist_coeffs, const std::string &config_folder) {
-        //std::cout << "undistortion procedure" << std::endl;
         cv::undistort(img_in, img_out, cam_matrix, dist_coeffs);
 
         //cv::imshow("image undistorted",  img_out);
@@ -177,7 +154,6 @@ namespace student {
                             const std::vector<cv::Point3f> &object_points_plane,
                             const std::vector<cv::Point2f> &dest_image_points_plane,
                             cv::Mat &plane_transf, const std::string &config_folder) {
-
         cv::Mat image_points;
 
         // project points
@@ -186,40 +162,9 @@ namespace student {
         plane_transf = cv::getPerspectiveTransform(image_points, dest_image_points_plane);
     }
 
-
     void unwarp(const cv::Mat &img_in, cv::Mat &img_out, const cv::Mat &transf,
                 const std::string &config_folder) {
         cv::warpPerspective(img_in, img_out, transf, img_in.size());
-        //cv::imshow("image unwrapper", img_out);
-        //cv::waitKey(20);
-    }
-
-    // Recursive function to get all the combination with repetition
-    void getPermutationRec(int set[], const vector<int> iter, int n, int k, vector<vector<int>> &des) {
-        if (k == 0) {
-            des.push_back(iter);
-            /*for(int i = 0; i < iter.size(); i++){
-                std::cout << iter[i];
-            }
-
-            std::cout << endl;*/
-            return;
-        }
-
-        for (int i = 0; i < n; i++) {
-            vector<int> temp = iter;
-            temp.push_back(set[i]);
-            getPermutationRec(set, temp, n, k - 1, des);
-        }
-    }
-
-    // Wrapper for permutation recursive function
-    vector<vector<int>> getPermutation(int set[], const vector<int>& iter, int n, int k) {
-        // Global vector to save all the possible victim descent
-        vector<vector<int>> descent;
-        // Call the recursive version
-        getPermutationRec(set, iter, n, k, descent);
-        return descent;
     }
 
     // Function to get the centroid point of a Polygon
@@ -337,7 +282,6 @@ namespace student {
             new_list.emplace_back(p);
         }
 
-
         ClipperLib::Clipper inter;
         ClipperLib::Paths sol2;
 
@@ -349,7 +293,6 @@ namespace student {
 
             inter.AddPaths(subj, ClipperLib::ptSubject, true);
         }
-
 
         for(auto &pt: borders){
             clip[0] << ClipperLib::IntPoint(pt.x*1000, pt.y*1000);
@@ -390,34 +333,31 @@ namespace student {
             }
         }
 
-// HSV back to BGR
+        // HSV back to BGR
         cv::cvtColor(img, img_in, cv::COLOR_HSV2BGR);
-
         cv::Mat showImage = img_in.clone();
- cout<<"sono arrivato";
+
         bool arena = true;
+
         string string;
         ifstream infile;
         infile.open (config_folder + "setup.txt");
+
         int l = 0;
         while(!infile.eof()) // To get you all the lines.
         {
             getline(infile,string); // Saves the line in STRING.
+
             if (l == 1){
-                if(string.compare("arena"))
-                    arena = true;
-                if(string.compare("Arena"))
-                    arena = true;
-                if(string.compare("simulator"))
-                    arena = false;
-                if(string.compare("Simulator"))
-                    arena = false;
-                cout<<string<<"arena: "<<arena<<std::endl;
-
+                if(string.compare("arena")) arena = true;
+                if(string.compare("Arena")) arena = true;
+                if(string.compare("simulator")) arena = false;
+                if(string.compare("Simulator")) arena = false;
             }
-            l++;
 
+            l++;
         }
+
         infile.close();
 
         std::cout << "enter in process map" << std::endl;
@@ -430,9 +370,6 @@ namespace student {
 
         cv::imwrite(config_folder + "/img_obstacle_recognition.jpg",showImage);
 
-        //cv::imshow("Original", img_in);
-        //cv::waitKey(1000);
-
         return res1 && res2;
     }
 
@@ -442,40 +379,38 @@ namespace student {
         //System to now how much time takes the plan
         auto started = std::chrono::high_resolution_clock::now();
 
+        // Take configuration from file
         int program = 2;
         int kmax = 15;
+
         string string;
+
         ifstream infile;
         infile.open (config_folder+"setup.txt");
         int l = 0;
+
         while(!infile.eof()) // To get you all the lines.
         {
             getline(infile,string); // Saves the line in STRING.
-            if (l == 3){
-                program = std::stoi(string);
-            }
 
-            if (l == 5){
-                kmax = std::stoi(string);
-            }
+            if (l == 3){ program = std::stoi(string); }
+            if (l == 5){ kmax = std::stoi(string); }
+
             l++;
         }
+
         infile.close();
 
         //Resize of the arena 
         Polygon obstacle_border = resizeBorders(borders, 0.07);
         Polygon voronoi_border = resizeBorders(borders, 0.06);
 
-        //Enlargement of the obstacle
+        //Enlargement and Merge of the interecating polygon
         std::vector<Polygon> englarge_obstacle = enlargeObstacle(obstacle_list, robot_r);
-
-        //Merge of the interecating polygon
         std::vector<Polygon> merged_list = mergePolygon(englarge_obstacle, obstacle_border);
 
-        //Enlargement for clean 2
+        //Enlargement and merge bigger for prunig level 2
         std::vector<Polygon> clean_obstacle = enlargeObstacle(obstacle_list, robot_r + 10);
-
-        //Merge for clean 2
         std::vector<Polygon> clean_merged_list = mergePolygon(clean_obstacle, obstacle_border);
 
         //Initialize voronoi diagram
@@ -521,7 +456,6 @@ namespace student {
 
             //Get the dubins curve
             Dubins dub;
-
             dub.setParams(rob_x, rob_y, rob_theta, xf, yf, angle, kmax);
 
             pair<int, curve> ret = dub.shortest_path();
@@ -536,7 +470,6 @@ namespace student {
             rob_x = xf;
             rob_y = yf;
             rob_theta = angle;
-
         }
 
         auto done = std::chrono::high_resolution_clock::now();
@@ -545,7 +478,5 @@ namespace student {
 
         //Send the path to the robot
         path = final_path;
-
     }
 }
-
