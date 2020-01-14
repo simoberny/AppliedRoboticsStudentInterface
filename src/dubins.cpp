@@ -10,7 +10,6 @@ void Dubins::setParams (double x0, double y0, double th0, double xf, double yf, 
     this->yf = yf;
     this->thf = thf;
     this->kmax = kmax;
-    this->lung = 0.0;
 }
 
 double sinc(double t){
@@ -312,6 +311,7 @@ pair<int, curve> Dubins::shortest_path () {
 }
 
 Path Dubins::getPath(curve c){
+    static double lung = 0;
     Path p;
     int npts = 50;
     double x, y, th;
@@ -323,26 +323,26 @@ Path Dubins::getPath(curve c){
 
     for(int i = 0; i < floor(c.a1.L/s_g); i++){
         s0 = s_g * i;
-        this->lung += s_g;
+        lung += s_g;
 
         tie(x, y, th) = circline(s0, c.a1.x0, c.a1.y0, c.a1.th0, c.a1.k);
-        p.points.emplace_back(this->lung,x,y,th,c.a1.k);
+        p.points.emplace_back(lung,x,y,th,c.a1.k);
     }
 
     for(int i = 0; i < floor(c.a2.L/s_g); i++){
         s1 =  s_g * i;
-        this->lung += s_g;
+        lung += s_g;
 
         tie(x, y, th) = circline(s1, c.a2.x0, c.a2.y0, c.a2.th0, c.a2.k);
-        p.points.emplace_back(this->lung,x,y,th,c.a2.k);
+        p.points.emplace_back(lung,x,y,th,c.a2.k);
     }
 
     for(int i = 0; i < floor(c.a3.L/s_g); i++){
         s2 =  s_g * i;
-        this->lung += s_g;
+        lung += s_g;
 
         tie(x, y, th) = circline(s2, c.a3.x0, c.a3.y0, c.a3.th0, c.a3.k);
-        p.points.emplace_back(this->lung,x,y,th,c.a3.k);
+        p.points.emplace_back(lung,x,y,th,c.a3.k);
     }
 
     return p;

@@ -178,25 +178,39 @@ compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<s
 
     double meta = 0;
 
-    if(a1<0){
-        a1 = 2*M_PI+a1;
-    }
-    if(a2<0){
-        a2 = 2*M_PI+a2;
+  
+   
+    if(a1< M_PI/2 && a1>0 && a2> -M_PI/2 && a2<0){
+        //a1 primo quadrante, a2 secondo:
+   
+        meta = std::fmod((((a1+a2)/2)), 2*M_PI);
+
+    }else if(a2< M_PI/2 && a2>0 && a1> -M_PI/2 && a1<0){
+        meta = std::fmod((((a1+a2)/2)), 2*M_PI);
+
+    }else{
+
+        if(a1<0){
+            a1 = 2*M_PI+a1;
+        }
+        if(a2<0){
+            a2 = 2*M_PI+a2;
+        }
+    
+        if(a1 < a2){
+            meta = std::fmod((((a1+a2)/2)), 2*M_PI);
+        }else{
+            meta = std::fmod((((a1+a2)/2)), 2*M_PI);
+        }        
     }
 
-    if(a1 < a2){
-        meta = std::fmod((((a1+a2)/2)), 2*M_PI);
-    }else{
-        meta = std::fmod((((a1+a2)/2)), 2*M_PI);
-    }
     if(meta<0){
         meta = 2*M_PI+meta;
     }
     gate_angle = std::fmod(meta+M_PI, 2*M_PI);
     //    il robot deve entrare quindi +pigregco
 
-    std::cout << "trovato gate.... angolo a meta: " << meta<< std::endl;
+    std::cout << "trovato gate...." << gate_angle << " angolo a meta: " << meta<< "a1: "<< a1 << "a2: "<<a2<< std::endl;
 
 }
 
@@ -255,6 +269,18 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
 
 
     std::cout << "Ho trovato triangolo robot!" << std::endl;
+}
+
+bool Voronoi::voronoi_match_obstacles(std::vector<Polygon> merged_obstacles,double x,double y){
+    for (int i = 0; i < merged_obstacles.size(); i++) {
+        Polygon v = merged_obstacles[i];
+        for (int j = 0; j < v.size(); j++) {
+            if ((fabs(x - v[j].x) < threshold_ricerca) && (fabs(y - v[j].y) < threshold_ricerca)){
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &enlarged_borders, const Polygon &borders,
@@ -339,18 +365,6 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
     construct_voronoi(points.begin(), points.end(), segments.begin(), segments.end(), &vd);
 }
 
-bool voronoi_match_obstacles(std::vector<Polygon> merged_obstacles,double x,double y){
-    for (int i = 0; i < merged_obstacles.size(); i++) {
-        Polygon v = merged_obstacles[i];
-        for (int j = 0; j < v.size(); j++) {
-            if ((fabs(x - v[j].x) < threshold_ricerca) && (fabs(y - v[j].y) < threshold_ricerca)){
-                //std::cout<<"elimon un vertie:  x: "<<x<<" y: "<<y<<" vicino al obstacle: x: "<<v[j].x<<"v[j].y "<<v[j].y<<std::endl;
-                return true;
-            }
-        }
-    }
-    return false;
-}
 
 cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
                    const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
@@ -478,7 +492,7 @@ using namespace boost;
  * @return position index
  */
 
-int get_pos_array(std::vector<Voronoi::Point> v, Voronoi::Point el) {
+int Voronoi::get_pos_array(std::vector<Voronoi::Point> v, Voronoi::Point el) {
     for (int i = 0; i < v.size(); i++) {
         if ((fabs(el.a - v[i].a) < threshold_ricerca) && (fabs(el.b - v[i].b) < threshold_ricerca)) return i;
     }
@@ -612,7 +626,29 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
 
     double a = meta;
 
-    if(meta > a2 && meta < M_PI || meta < M_PI/2 && a2 > 3/2*M_PI){
+    double per = (d1 > d2) ? 1 - d2/d1 : 1 - d1/d2;
+
+    double a_minus = std::fmod(meta - (angolo_interno(a2,meta) * per), 2*M_PI);
+    double a_plus = std::fmod(meta + (angolo_interno(a2,meta) * per), 2*M_PI);
+
+    double angle_a1_minus = angolo_interno(a2,a_minus);
+    double angle_a1_plus = angolo_interno(a2,a_plus);
+
+    if(d1 > d2){
+        if(angle_a1_plus > angle_a1_minus){
+            a = a_minus;
+        }else{
+            a = a_plus;
+        }
+    }else if (d2 > d1){
+        if(angle_a1_plus > angle_a1_minus){
+            a = a_plus;
+        }else{
+            a = a_minus;
+        }
+    }
+
+    /*if(meta > a2 && meta < M_PI){
         if(d1 > d2){
             double per = 1- d2/d1;
             a = meta - (angolo_interno(a2,meta) * per);
@@ -628,7 +664,7 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
             double per = 1 - d1/d2;
             a = meta - (angolo_interno(a2,meta) * per);
         }
-    }
+    }*/
 
 
 
@@ -708,12 +744,8 @@ bool compare_victim_number(std::pair<int, Voronoi::Point> v1, std::pair<int, Vor
 
 
 void Voronoi::recover_all(Graph &myg, std::vector<std::pair<int, bool>> &recover_path){
-
-    int robot_pos = get_pos_array(myg.vertex_map, this->robot_center);
-    int gate_pos = get_pos_array(myg.vertex_map, this->gate_center);
-
     // Compute minimum path in piece through djjkstra reverse flow
-    int pos = gate_pos;
+    int pos = this->gate_pos;
 
     for (int a = 0; a < this->victims_center.size(); a++) {
         int victim_node_pos = get_pos_array(myg.vertex_map, this->victims_center[a].second);
@@ -722,26 +754,18 @@ void Voronoi::recover_all(Graph &myg, std::vector<std::pair<int, bool>> &recover
         pos = victim_node_pos;
     }
 
-    recover_path = myg.add_piece_path(robot_pos, pos);
+    recover_path = myg.add_piece_path(this->robot_pos, pos);
 }
 
 void Voronoi::recover_nothing(Graph &myg, std::vector<std::pair<int, bool>> &fastest_path){
-
-    int robot_pos = get_pos_array(myg.vertex_map, this->robot_center);
-    int gate_pos = get_pos_array(myg.vertex_map, this->gate_center);
-
     // Compute minimum path in piece through djjkstra reverse flow
-    fastest_path = myg.add_piece_path(robot_pos, gate_pos);
+    fastest_path = myg.add_piece_path(this->robot_pos, this->gate_pos);
 }
 
 void Voronoi::fast_recover(Graph &myg, std::vector<std::pair<int, bool>> &recover_path){
-
-    int robot_pos = get_pos_array(myg.vertex_map, this->robot_center);
-    int gate_pos = get_pos_array(myg.vertex_map, this->gate_center);
-
     // Compute minimum path in piece through djjkstra reverse flow
-    int pos = gate_pos;
-    std::vector<std::pair<int, bool> > fastest_path = myg.add_piece_path(robot_pos, pos);
+    int pos = this->gate_pos;
+    std::vector<std::pair<int, bool> > fastest_path = myg.add_piece_path(this->robot_pos, pos);
     clean_path(myg.vertex_map, fastest_path);
 
     myg.clear_path();
@@ -762,7 +786,7 @@ void Voronoi::fast_recover(Graph &myg, std::vector<std::pair<int, bool>> &recove
                 double d = distance_line_point(x1, y1, x2, y2, this->victims_center[a].second.a, this->victims_center[a].second.b);
                 //std::cout << "Distance victim path: " << d << std::endl;
 
-                if(d < 0.10){
+                if(d < 0.18){
                     int victim_node_pos = get_pos_array(myg.vertex_map, this->victims_center[a].second);
 
                     recover_path = myg.add_piece_path(victim_node_pos, pos);
@@ -774,7 +798,7 @@ void Voronoi::fast_recover(Graph &myg, std::vector<std::pair<int, bool>> &recove
         }
     }
 
-    recover_path = myg.add_piece_path(robot_pos, pos);
+    recover_path = myg.add_piece_path(this->robot_pos, pos);
 }
 
 /**
@@ -782,48 +806,15 @@ void Voronoi::fast_recover(Graph &myg, std::vector<std::pair<int, bool>> &recove
  * @param vd Voronoi diagram
  * @return Minimum point path including approach angle
  */
-std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta, double& gate_angle, int program) {
+std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_diagram<double> &vd,std::vector<Polygon> merged_obstacles, const float theta, double& gate_angle, int program, std::vector<Polygon> clean_obstacles) {
     //Graph struct
     Graph myg;
-
-    //  vertex array
-    int vertex_id = 0;
-    for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it) {
-        double x = it->x() / scale;
-        double y = it->y() / scale;
-        if(!voronoi_match_obstacles(merged_obstacles,x,y)) {
-            myg.vertex_map.emplace_back(Voronoi::Point(x, y));
-        }
-
-        vertex_id++;
-    }
-
-    // edge array based on previous vertex
-    for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin(); it != vd.edges().end(); ++it) {
-        if ((it->vertex0() != NULL) &&
-            (it->vertex1() != NULL)) {  //NOTE: se la retta va all'infinito allora vertex = NULL!!!
-
-            if (it->is_primary()) {
-                Voronoi::Point p1 = Voronoi::Point(it->vertex0()->x() / scale, it->vertex0()->y() / scale);
-                Voronoi::Point p2 = Voronoi::Point(it->vertex1()->x() / scale, it->vertex1()->y() / scale);
-
-                int pos_1 = get_pos_array(myg.vertex_map, p1);
-                int pos_2 = get_pos_array(myg.vertex_map, p2);
-
-                if (pos_1 != -1 && pos_2 != -1) {
-                    //Compute the euclidean distance that is used as a weight
-                    double distance = sqrt(pow(p1.a - p2.a, 2) + pow(p1.b - p2.b, 2));
-
-                    myg.weights.emplace_back(distance * 1000.0);
-                    myg.edge.emplace_back(Edge(pos_1, pos_2));
-                }
-            }
-        }
-    }
+        // Compute Graph
+    myg.createGraph(vd, merged_obstacles);
 
     // Get key position based on vertex pos
-    int robot_pos = get_pos_array(myg.vertex_map, this->robot_center);
-    int gate_pos = get_pos_array(myg.vertex_map, this->gate_center);
+    this->robot_pos = get_pos_array(myg.vertex_map, this->robot_center);
+    this->gate_pos = get_pos_array(myg.vertex_map, this->gate_center);
 
     std::vector<int> victim_pos;
 
@@ -833,12 +824,6 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
     // Get index of victims vertex
     for (int i = 0; i < this->victims_center.size(); i++)
         victim_pos.emplace_back(get_pos_array(myg.vertex_map, this->victims_center[i].second));
-
-
-    // Compute Graph
-    int num_nodes = myg.getVertexSize();
-    myg.createGraph();
-
 
     std::vector<std::pair<int, bool> > path;
 
@@ -857,7 +842,7 @@ std::vector<std::tuple<int, Voronoi::Point, double> > Voronoi::graph(voronoi_dia
     }
 
     clean_path(myg.vertex_map, path);
-    clean_path_2(myg.vertex_map, path, merged_obstacles);
+    clean_path_2(myg.vertex_map, path, clean_obstacles);
 
     // Return shortest path structure
     std::vector<std::tuple<int, Voronoi::Point, double> > shortest_path;

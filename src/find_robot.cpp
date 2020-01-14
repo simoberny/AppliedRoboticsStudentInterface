@@ -5,7 +5,7 @@ namespace student {
                    const std::string &config_folder) {
 
         //aumento luminosità.... penultimo parametro é alfa, ultimo è beta  pixel = pixel*alfa+beta
-        img_in.convertTo(img_in, -1, 1.5, 0);
+        img_in.convertTo(img_in, -1, 2, 0);
         //aumento della staturazione
         // BGR to HSV
         cv::Mat img;
@@ -20,13 +20,12 @@ namespace student {
             }
         }
 
-
         cv::Mat hsv_img;
         cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
 
         cv::Mat blue_mask;
         //cv::inRange(hsv_img, cv::Scalar(100, 120, 150), cv::Scalar(135, 255, 255), blue_mask);
-        cv::inRange(hsv_img, cv::Scalar(100, 100, 50), cv::Scalar(130, 255, 255), blue_mask);
+        cv::inRange(hsv_img, cv::Scalar(100, 100, 30), cv::Scalar(130, 255, 255), blue_mask);
 
         std::vector<std::vector<cv::Point>> contours;
         cv::findContours(blue_mask, contours,
@@ -58,14 +57,6 @@ namespace student {
         double area = cv::contourArea(approx_curve);
 
         if (approx_curve.size() == 3 && area > 400) {
-/*
-            std::cout << "-----Aprox Contour size: " << approx_curve.size() << std::endl;
-            std::cout << "Area: " << area << std::endl;
-            std::cout << "punti trovati: 1 " << std::endl;
-            std::cout << " x " << approx_curve[0].x << " y " << approx_curve[0].y << std::endl;
-            std::cout << " x " << approx_curve[1].x << " y " << approx_curve[1].y << std::endl;
-            std::cout << " x " << approx_curve[2].x << " y " << approx_curve[2].y << std::endl;
-*/
             for (const auto &pt: approx_curve) {
                 triangle.emplace_back(pt.x / scale, pt.y / scale);
             }
@@ -100,16 +91,8 @@ namespace student {
             std::vector<std::vector<cv::Point>> vec_approx_curve;
             vec_approx_curve = {approx_curve};
             cv::drawContours(img_in, vec_approx_curve, -1, cv::Scalar(0, 0, 255), 3, cv::LINE_AA);
-            //calcolo la posizione del robot (rotazione e posizione del vertice del triangolo)
-/*
-            std::cout << "-----triangle position (in meter?):  " << std::endl;
-            std::cout << " x " << triangle[0].x << " y " << triangle[0].y << std::endl;
-            std::cout << " x " << triangle[1].x << " y " << triangle[1].y << std::endl;
-            std::cout << " x " << triangle[2].x << " y " << triangle[2].y << std::endl;
-*/
 
             return true;
-
 
         } else {
             return false;

@@ -472,6 +472,12 @@ namespace student {
         //Merge of the interecating polygon
         std::vector<Polygon> merged_list = mergePolygon(englarge_obstacle, obstacle_border);
 
+        //Enlargement for clean 2
+        std::vector<Polygon> clean_obstacle = enlargeObstacle(obstacle_list, robot_r + 10);
+
+        //Merge for clean 2
+        std::vector<Polygon> clean_merged_list = mergePolygon(clean_obstacle, obstacle_border);
+
         //Initialize voronoi diagram
         voronoi_diagram<double> vd;
         Voronoi v;
@@ -481,7 +487,7 @@ namespace student {
         v.calculate(merged_list, voronoi_border, borders, victim_list, gate, x, y, theta, vd, gate_angle);
 
         //Generate the graph
-        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list, theta, gate_angle, program);
+        std::vector<std::tuple<int, Voronoi::Point, double> > t = v.graph(vd,merged_list, theta, gate_angle, program, clean_merged_list);
 
         //Draw all the scene
         cv::Mat image = v.draw(merged_list, voronoi_border, victim_list, gate, x, y, theta, vd, t);
@@ -530,6 +536,7 @@ namespace student {
             rob_x = xf;
             rob_y = yf;
             rob_theta = angle;
+
         }
 
         auto done = std::chrono::high_resolution_clock::now();

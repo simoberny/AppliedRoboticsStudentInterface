@@ -32,7 +32,6 @@ class Dubins{
         double x0, y0, th0;
         double xf, yf, thf;
         double kmax;
-        double lung; 
     public: 
         Dubins();
         void setParams(double x0, double y0, double th0, double xf, double yf, double thf, double kmax);
