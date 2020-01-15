@@ -91,6 +91,8 @@ bool processGate(const cv::Mat &img_in, cv::Mat &showImage, const double scale, 
 
 bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scale, std::vector<std::pair<int, Polygon>> &victim_list,
                     const std::string &config_folder, bool arena) {
+    std::cout << "\033[1;36m#Finding victims... \033[0m\n" << std::endl;
+
     cv::Mat hsv_img;
     cv::cvtColor(img_in, hsv_img, cv::COLOR_BGR2HSV);
 
@@ -121,7 +123,7 @@ bool processVictims(const cv::Mat &img_in, cv::Mat &showImage, const double scal
 
             int victim_n = get_victim_number(boundingRect(cv::Mat(approx_curve)), img_in, showImage, config_folder);
 
-            std::cout << "N: " << victim_n << std::endl;
+            std::cout << "N:" << "\033[1;33m"<< victim_n << "\033[0m" << std::endl;
 
             victim_list.push_back({victim_n, scaled_contour});
             contours_approx = {approx_curve};

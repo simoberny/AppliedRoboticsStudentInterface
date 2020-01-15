@@ -376,7 +376,7 @@ namespace student {
     bool planPath(const Polygon &borders, const std::vector<Polygon> &obstacle_list,
                   const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
                   const float y, const float theta, Path &path, const string &config_folder) {
-        std::cout << "\033[1;36m#Finding victims... \033[0m\n" << std::endl;
+        std::cout << "\n\033[1;36m#Planning path... \033[0m\n" << std::endl;
 
         //System to now how much time takes the plan
         auto started = std::chrono::high_resolution_clock::now();

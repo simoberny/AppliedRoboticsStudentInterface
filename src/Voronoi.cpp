@@ -658,7 +658,7 @@ double get_angle(Voronoi::Point first, Voronoi::Point second, Voronoi::Point thi
         meta = 2*M_PI+meta;
 
     if(angolo_interno(a1, a2) < 0.20){
-        std::cout << "Angolo stretto, sposto punto!!! " << std::endl;
+        std::cout << "Angolo stretto, considero meta! " << std::endl;
         return meta;
     }
 
