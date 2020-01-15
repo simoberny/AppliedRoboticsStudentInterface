@@ -7,6 +7,8 @@ int get_victim_number(cv::Rect singleRect, cv::Mat img, cv::Mat &showImage, cons
     cv::Mat hsv_img;
     cv::cvtColor(img, hsv_img, cv::COLOR_BGR2HSV);
 
+    std::cout << "\033[1;36m#Finding victims... \033[0m\n" << std::endl;
+
     cv::Mat green_mask;
     cv::inRange(hsv_img, cv::Scalar(40, 30, 50), cv::Scalar(85, 255, 180), green_mask);
     cv::Mat green_mask_inv;
