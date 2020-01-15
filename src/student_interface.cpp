@@ -474,7 +474,7 @@ namespace student {
 
         auto done = std::chrono::high_resolution_clock::now();
 
-        cout << "TEMPO DI ESECUZIONE: " << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << endl;
+        cout << "\033[1;31mTEMPO DI ESECUZIONE: " << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << "\033[0m\n" << endl;
 
         //Send the path to the robot
         path = final_path;
