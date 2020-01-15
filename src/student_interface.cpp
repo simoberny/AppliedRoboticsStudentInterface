@@ -410,7 +410,7 @@ namespace student {
         std::vector<Polygon> merged_list = mergePolygon(englarge_obstacle, obstacle_border);
 
         //Enlargement and merge bigger for prunig level 2
-        std::vector<Polygon> clean_obstacle = enlargeObstacle(obstacle_list, robot_r + 10);
+        std::vector<Polygon> clean_obstacle = enlargeObstacle(obstacle_list, robot_r + 25);
         std::vector<Polygon> clean_merged_list = mergePolygon(clean_obstacle, obstacle_border);
 
         //Initialize voronoi diagram

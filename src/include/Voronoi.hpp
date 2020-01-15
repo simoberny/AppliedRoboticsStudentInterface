@@ -45,7 +45,7 @@ const double threshold_ricerca = 0.01;
 
 const double threshold_angle = 0.22;
 const double threshold_dist = 0.14;
-const double max_threshold_dist = 0.40;
+const double max_threshold_dist = 0.60;
 
 static double scale = 500.0;
 
