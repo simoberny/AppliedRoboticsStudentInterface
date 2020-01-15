@@ -5,7 +5,7 @@ namespace student {
                    const std::string &config_folder) {
 
         //aumento luminosità.... penultimo parametro é alfa, ultimo è beta  pixel = pixel*alfa+beta
-        img_in.convertTo(img_in, -1, 2, 0);
+        img_in.convertTo(img_in, -1, 1.5, 0);
         //aumento della staturazione
         // BGR to HSV
         cv::Mat img;
@@ -25,7 +25,7 @@ namespace student {
 
         cv::Mat blue_mask;
         //cv::inRange(hsv_img, cv::Scalar(100, 120, 150), cv::Scalar(135, 255, 255), blue_mask);
-        cv::inRange(hsv_img, cv::Scalar(100, 100, 30), cv::Scalar(130, 255, 255), blue_mask);
+        cv::inRange(hsv_img, cv::Scalar(90, 80, 70), cv::Scalar(130, 255, 255), blue_mask);
 
         std::vector<std::vector<cv::Point>> contours;
         cv::findContours(blue_mask, contours,
