@@ -76,8 +76,7 @@ double distance_line_point(double l1_x1, double l1_y1, double l1_x2, double l1_y
     point_type p1(p_x1, p_y1);
     line1.push_back(point_type(l1_x1, l1_y1));
     line1.push_back(point_type(l1_x2, l1_y2));
-    std::cout
-            << "Line-point: " << boost::geometry::distance(line1, p1) << std::endl;
+    //std::cout << "Line-point: " << boost::geometry::distance(line1, p1) << std::endl;
     return boost::geometry::distance(line1, p1);
 }
 
@@ -94,11 +93,11 @@ distance_line_line(double l1_x1, double l1_y1, double l1_x2, double l1_y2, doubl
     line1.push_back(point_type(l1_x2, l1_y2));
     line2.push_back(point_type(l2_x1, l2_y1));
     line2.push_back(point_type(l2_x2, l2_y2));
-    std::cout
-            << "Line-line: " << boost::geometry::distance(line1, line2) << std::endl;
+   // std::cout<< "Line-line: " << boost::geometry::distance(line1, line2) << std::endl;
     return boost::geometry::distance(line1, line2);
 }
 
+//find the points of the acute angle over the gate
 void
 compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<std::vector<double>> &triangle_gate, double& gate_angle) {
 
@@ -143,8 +142,10 @@ compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<s
         x2 = borders[0].x;
         y2 = borders[0].y;
     }
+    /*
     std::cout << "index border : " << index << " distance gate-border: " << distance << " gate center: "
               << gate_center.first << " " << gate_center.second << std::endl;
+              */
 
     //TODO: attenzione se non vengono trovati i 2 punti del triangolo con massima distanza dal bordo triangle vector non avrà 2 vettori di punti e la lettura dei valori del triangolo andrà out of boundaries killando il programma!!!
     //TODO: verificre con differenti angoli di partenza!!!S
@@ -162,7 +163,7 @@ compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<s
         if (distance_line_point(x1, y1, x2, y2, cross_vertex[i][0], cross_vertex[i][1]) > distance) {
             std::vector<double> v = {cross_vertex[i][0], cross_vertex[i][1]};
             triangle_gate.emplace_back(v);
-            std::cout << "vertex added: x: " << cross_vertex[i][0] << " y: " << cross_vertex[i][1] << " " << std::endl;
+           // std::cout << "vertex added: x: " << cross_vertex[i][0] << " y: " << cross_vertex[i][1] << " " << std::endl;
         }
     }
 
@@ -210,11 +211,13 @@ compute_triangle_gate(const Polygon &borders, const Polygon &gate, std::vector<s
     gate_angle = std::fmod(meta+M_PI, 2*M_PI);
     //    il robot deve entrare quindi +pigregco
 
-    std::cout << "trovato gate...." << gate_angle << " angolo a meta: " << meta<< "a1: "<< a1 << "a2: "<<a2<< std::endl;
+    //std::cout << "trovato gate...." << gate_angle << " angolo a meta: " << meta<< " a1: "<< a1 << " a2: "<<a2<< std::endl;
 
 }
 
-
+/**
+ * Find the points of the acute angle over the robot
+ */
 void compute_triangle_robot(const Polygon &borders, const float x, const float y, const float const_theta,
                             std::vector<std::vector<double>> &triangle_robot) {
 
@@ -246,10 +249,12 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
         double q2 = y - m2 * x;
         std::vector<double> v2 = {x + delta, m1 * (x + delta) + q1};
         std::vector<double> v3 = {x + delta, m2 * (x + delta) + q2};
+        /*
         std::cout << "caso1..... m1: " << m1 << " m2: " << m2 << " q1: " << q1 << " q2: " << q2 << " theta: "
                   << theta
                   << " tan: " << m << " p1x: " << x + delta << " p1y: " << m1 * (x + delta) + q1 << " p2x: "
                   << x + delta << " p2y: " << m2 * (x + delta) + q2 << std::endl;
+                  */
         triangle_robot.emplace_back(v2);
         triangle_robot.emplace_back(v3);
     } else {
@@ -259,18 +264,26 @@ void compute_triangle_robot(const Polygon &borders, const float x, const float y
         double q2 = y - m2 * x;
         std::vector<double> v2 = {x - delta, m1 * (x - delta) + q1};
         std::vector<double> v3 = {x - delta, m2 * (x - delta) + q2};
+        /*
         std::cout << "caso2..... m1: " << m1 << " m2: " << m2 << " q1: " << q1 << " q2: " << q2 << " theta: "
                   << theta
                   << " tan: " << m << " p1x: " << x + delta << " p1y: " << m1 * (x + delta) + q1 << " p2x: "
                   << x + delta << " p2y: " << m2 * (x + delta) + q2 << std::endl;
+                  */
         triangle_robot.emplace_back(v2);
         triangle_robot.emplace_back(v3);
     }
 
 
-    std::cout << "Ho trovato triangolo robot!" << std::endl;
+    //std::cout << "Ho trovato triangolo robot!" << std::endl;
 }
-
+/**
+ * find if there is a point in the obstagle polygons that is near the point (x,y)
+ * @param merged_obstacles  polygon
+ * @param x
+ * @param y
+ * @return true/false
+ */
 bool Voronoi::voronoi_match_obstacles(std::vector<Polygon> merged_obstacles,double x,double y){
     for (int i = 0; i < merged_obstacles.size(); i++) {
         Polygon v = merged_obstacles[i];
@@ -282,6 +295,19 @@ bool Voronoi::voronoi_match_obstacles(std::vector<Polygon> merged_obstacles,doub
     }
     return false;
 }
+/**
+ * the procedure caculate de voronoi diabram based on the obstacles, victime gate e robot position
+ * @param obstacle_list
+ * @param enlarged_borders
+ * @param borders
+ * @param victim_list
+ * @param gate
+ * @param x posizione robot
+ * @param y pos robot
+ * @param theta angolo robot
+ * @param vd  voronoi diagram istance
+ * @param gate_angle
+ */
 
 void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon &enlarged_borders, const Polygon &borders,
                         const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
@@ -365,6 +391,19 @@ void Voronoi::calculate(const std::vector<Polygon> &obstacle_list, const Polygon
     construct_voronoi(points.begin(), points.end(), segments.begin(), segments.end(), &vd);
 }
 
+/**
+ * Save the vornoid diagram on a file
+ * @param obstacle_list
+ * @param borders
+ * @param victim_list
+ * @param gate
+ * @param x
+ * @param y
+ * @param theta
+ * @param vd
+ * @param shortest percorso minimo (stampato in giallo)
+ * @return
+ */
 
 cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &borders,
                    const std::vector<std::pair<int, Polygon>> &victim_list, const Polygon &gate, const float x,
@@ -380,9 +419,11 @@ cv::Mat Voronoi::draw(const std::vector<Polygon> &obstacle_list, const Polygon &
              cv::Point(triangle_gate[1][0] * scale, triangle_gate[1][1] * scale), cv::Scalar(0, 87, 205), 2, 1);
     cv::line(image, cv::Point(triangle_gate[2][0] * scale, triangle_gate[2][1] * scale),
              cv::Point(triangle_gate[0][0] * scale, triangle_gate[0][1] * scale), cv::Scalar(0, 87, 205), 2, 1);
+    /*
     std::cout << "triangle gate:    x1 " << triangle_gate[0][0] * scale << " y1 " << triangle_gate[0][1] * scale
               << " x2 " << triangle_gate[1][0] * scale << " y2 " << triangle_gate[1][1] * scale << " x3 "
               << triangle_gate[2][0] * scale << " y3 " << triangle_gate[1][0] * scale << std::endl;
+              */
 
     //compute the blue triangle over the robot
     cv::line(image, cv::Point(triangle_robot[0][0] * scale, triangle_robot[0][1] * scale),
